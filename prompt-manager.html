@@ -11891,13 +11891,23 @@ MDN文档,https://developer.mozilla.org,Web开发文档,开发工具,"文档,前
 
         // 认证相关函数
         async function showLoginModal() {
+            // 检查是否已有登录弹窗，避免重复创建
+            const existingModal = document.querySelector('.login-modal');
+            if (existingModal) {
+                existingModal.remove();
+            }
+            
+            // 关闭所有其他模态框
+            const allModals = document.querySelectorAll('.modal');
+            allModals.forEach(modal => modal.remove());
+            
             const modal = document.createElement('div');
-            modal.className = 'modal';
+            modal.className = 'modal login-modal';
             modal.innerHTML = `
                 <div class="modal-content">
                     <div class="modal-header">
                         <h3>登录云端同步</h3>
-                        <span class="close" onclick="this.closest('.modal').remove()">&times;</span>
+                        <span class="close" onclick="closeLoginModal()">&times;</span>
                     </div>
                     <div class="modal-body">
                         <div class="form-group">
@@ -11906,7 +11916,7 @@ MDN文档,https://developer.mozilla.org,Web开发文档,开发工具,"文档,前
                         </div>
                         <div class="auth-actions">
                             <button class="btn btn-primary" onclick="attemptLogin()">登录</button>
-                            <button class="btn btn-secondary" onclick="this.closest('.modal').remove()">取消</button>
+                            <button class="btn btn-secondary" onclick="closeLoginModal()">取消</button>
                         </div>
                     </div>
                 </div>
@@ -11983,6 +11993,13 @@ MDN文档,https://developer.mozilla.org,Web开发文档,开发工具,"文档,前
             document.getElementById('loginPassword').focus();
         }
 
+        function closeLoginModal() {
+            const modal = document.querySelector('.login-modal');
+            if (modal) {
+                modal.remove();
+            }
+        }
+
         async function attemptLogin() {
             const password = document.getElementById('loginPassword').value;
             if (!password) {
@@ -12006,12 +12023,13 @@ MDN文档,https://developer.mozilla.org,Web开发文档,开发工具,"文档,前
                     authState.isLoggedIn = true;
                     localStorage.setItem('authToken', result.token);
                     
-                    document.querySelector('.modal').remove();
+                    // 关闭登录弹窗
+                    closeLoginModal();
                     updateSyncStatus();
                     showToast('登录成功', 'success');
                     
-                    // 自动同步数据
-                    await syncToCloud();
+                    // 自动从云端加载数据
+                    await loadFromCloud(true);
                 } else {
                     showToast(result.error || '登录失败', 'error');
                 }
@@ -12050,9 +12068,11 @@ MDN文档,https://developer.mozilla.org,Web开发文档,开发工具,"文档,前
         }
 
         // 云端同步功能
-        async function syncToCloud() {
+        async function syncToCloud(isSilent = false) {
             if (!authState.isLoggedIn) {
-                showToast('请先登录', 'warning');
+                if (!isSilent) {
+                    showToast('请先登录', 'warning');
+                }
                 return;
             }
 
@@ -12073,20 +12093,27 @@ MDN文档,https://developer.mozilla.org,Web开发文档,开发工具,"文档,前
                     authState.lastSync = now;
                     localStorage.setItem('lastSync', now);
                     updateSyncStatus();
-                    showToast('数据已同步到云端', 'success');
+                    
+                    if (!isSilent) {
+                        showToast('数据已同步到云端', 'success');
+                    }
                 } else {
                     throw new Error(result.error || '同步失败');
                 }
             } catch (error) {
                 console.error('Sync error:', error);
-                showToast('同步失败: ' + error.message, 'error');
+                if (!isSilent) {
+                    showToast('同步失败: ' + error.message, 'error');
+                }
                 updateSyncStatus();
             }
         }
 
-        async function loadFromCloud() {
+        async function loadFromCloud(isAutoSync = false) {
             if (!authState.isLoggedIn) {
-                showToast('请先登录', 'warning');
+                if (!isAutoSync) {
+                    showToast('请先登录', 'warning');
+                }
                 return;
             }
 
@@ -12118,53 +12145,61 @@ MDN文档,https://developer.mozilla.org,Web开发文档,开发工具,"文档,前
                     localStorage.setItem('lastSync', result.lastSync);
                     updateSyncStatus();
                     
-                    showToast('已从云端加载数据', 'success');
+                    if (!isAutoSync) {
+                        showToast('已从云端加载数据', 'success');
+                    }
                 } else {
-                    showToast('云端暂无数据', 'info');
+                    // 云端无数据，同步本地数据到云端
+                    if (isAutoSync && (appData.prompts.length > 0 || appData.websites.length > 0 || appData.filters.length > 0)) {
+                        await syncToCloud(true); // 静默同步
+                        showToast('本地数据已同步到云端', 'success');
+                    } else if (!isAutoSync) {
+                        showToast('云端暂无数据', 'info');
+                    }
                 }
             } catch (error) {
                 console.error('Load error:', error);
-                showToast('加载失败: ' + error.message, 'error');
+                if (!isAutoSync) {
+                    showToast('加载失败: ' + error.message, 'error');
+                }
             }
         }
 
         function updateSyncStatus() {
-            // 更新同步按钮状态
+            // 更新同步按钮状态和样式
             const loginBtn = document.querySelector('.sync-buttons button:last-child');
             if (loginBtn) {
                 loginBtn.innerHTML = authState.isLoggedIn ? '🚪' : '🔑';
                 loginBtn.title = authState.isLoggedIn ? '退出登录' : '登录';
+                
+                // 更新按钮样式以表示状态
+                if (authState.isLoggedIn) {
+                    loginBtn.style.background = 'var(--success-color)';
+                    loginBtn.style.color = 'white';
+                    loginBtn.style.borderColor = 'var(--success-color)';
+                } else {
+                    loginBtn.style.background = 'var(--surface-color)';
+                    loginBtn.style.color = 'var(--text-primary)';
+                    loginBtn.style.borderColor = 'var(--border-color)';
+                }
             }
             
-            // 创建或更新同步状态显示
-            let statusEl = document.querySelector('.sync-status');
-            if (!statusEl) {
-                statusEl = document.createElement('div');
-                statusEl.className = 'sync-status';
-                
-                // 添加到同步按钮组中
-                const syncButtons = document.querySelector('.sync-buttons');
-                if (syncButtons) {
-                    syncButtons.appendChild(statusEl);
-                }
-            }
-
-            if (statusEl) {
-                const indicator = document.createElement('span');
-                indicator.className = 'sync-indicator';
-                
-                let statusText = '';
+            // 更新其他同步按钮的可用状态
+            const syncBtn = document.querySelector('.sync-buttons button:first-child');
+            const loadBtn = document.querySelector('.sync-buttons button:nth-child(2)');
+            
+            if (syncBtn && loadBtn) {
                 if (authState.isLoggedIn) {
-                    indicator.classList.add('synced');
-                    statusText = `已登录`;
+                    syncBtn.style.opacity = '1';
+                    loadBtn.style.opacity = '1';
+                    syncBtn.style.cursor = 'pointer';
+                    loadBtn.style.cursor = 'pointer';
                 } else {
-                    indicator.classList.add('offline');
-                    statusText = '未登录';
+                    syncBtn.style.opacity = '0.6';
+                    loadBtn.style.opacity = '0.6';
+                    syncBtn.style.cursor = 'not-allowed';
+                    loadBtn.style.cursor = 'not-allowed';
                 }
-                
-                statusEl.innerHTML = '';
-                statusEl.appendChild(indicator);
-                statusEl.appendChild(document.createTextNode(statusText));
             }
         }
 
@@ -12236,17 +12271,6 @@ MDN文档,https://developer.mozilla.org,Web开发文档,开发工具,"文档,前
                     .sync-buttons {
                         order: 1;
                     }
-                    .sync-status {
-                        display: flex;
-                        align-items: center;
-                        gap: 4px;
-                        font-size: 12px;
-                        color: var(--text-secondary);
-                        padding: 4px 8px;
-                        background: var(--background-color);
-                        border-radius: var(--radius-sm);
-                        margin-left: 8px;
-                    }
                 `;
                 document.head.appendChild(style);
             }
@@ -12268,6 +12292,9 @@ MDN文档,https://developer.mozilla.org,Web开发文档,开发工具,"文档,前
                 if (!isValid) {
                     localStorage.removeItem('authToken');
                     authState.token = null;
+                } else {
+                    // 如果token有效，自动从云端加载数据
+                    await loadFromCloud(true);
                 }
             }
             
@@ -12276,13 +12303,11 @@ MDN文档,https://developer.mozilla.org,Web开发文档,开发工具,"文档,前
             updateSyncStatus();
             
             // 定期自动同步（每5分钟）
-            if (authState.isLoggedIn) {
-                setInterval(() => {
-                    if (authState.isLoggedIn) {
-                        syncToCloud();
-                    }
-                }, 5 * 60 * 1000);
-            }
+            setInterval(() => {
+                if (authState.isLoggedIn) {
+                    syncToCloud(true); // 静默定期同步
+                }
+            }, 5 * 60 * 1000);
         }
 
 
@@ -12295,8 +12320,8 @@ MDN文档,https://developer.mozilla.org,Web开发文档,开发工具,"文档,前
             if (authState.isLoggedIn) {
                 clearTimeout(window.autoSyncTimeout);
                 window.autoSyncTimeout = setTimeout(() => {
-                    syncToCloud();
-                }, 2000); // 2秒后自动同步
+                    syncToCloud(true); // 静默同步
+                }, 1000); // 1秒后自动同步
             }
         };
 
