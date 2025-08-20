@@ -592,6 +592,25 @@
             align-items: center;
             justify-content: center;
         }
+        
+        /* 全屏模态框容器样式 */
+        .modal.modal-fullscreen {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            backdrop-filter: blur(5px);
+        }
+        
+        .modal.modal-fullscreen.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
 
         .modal-content {
             background: white;
@@ -602,6 +621,8 @@
             max-height: 80vh;
             overflow-y: auto;
         }
+        
+        /* 覆盖默认的modal-content样式 - 已移动到上方 */
 
         .modal-header {
             display: flex;
@@ -3576,14 +3597,19 @@
             }
         }
         
-        /* 全屏式的添加/查看提示词模态框 */
+        /* 全屏式的添加/查看提示词模态框 - 重新定义 */
         .modal-fullscreen .modal-content {
-            width: 98vw;
-            height: 95vh;
-            max-width: none;
-            max-height: none;
+            width: 98vw !important;
+            height: 95vh !important;
+            max-width: none !important;
+            max-height: none !important;
+            padding: 0 !important;
+            margin: 0 !important;
+            border-radius: 12px !important;
             display: flex;
             flex-direction: column;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25) !important;
+            overflow: hidden;
         }
         
         .modal-fullscreen .modal-header {
@@ -3749,9 +3775,9 @@
         
         @media (max-width: 768px) {
             .modal-fullscreen .modal-content {
-                width: 100vw;
-                height: 100vh;
-                border-radius: 0;
+                width: 100vw !important;
+                height: 100vh !important;
+                border-radius: 0 !important;
             }
             
             .modal-fullscreen .modal-body {
@@ -4579,7 +4605,7 @@ Stack Overflow - https://stackoverflow.com - 程序员问答社区\n解决编程
     </div>
 
     <!-- 添加提示词模态框 -->
-    <div id="addPromptModal" class="modal">
+    <div id="addPromptModal" class="modal modal-fullscreen">
         <div class="modal-content modal-fullscreen">
             <div class="modal-header">
                 <div class="modal-title">添加提示词</div>
@@ -4755,7 +4781,7 @@ Stack Overflow - https://stackoverflow.com - 程序员问答社区\n解决编程
     </div>
 
     <!-- 查看提示词模态框 -->
-    <div id="viewPromptModal" class="modal">
+    <div id="viewPromptModal" class="modal modal-fullscreen">
         <div class="modal-content modal-fullscreen">
             <div class="modal-header">
                 <div class="modal-title" id="viewPromptTitle">查看提示词</div>
