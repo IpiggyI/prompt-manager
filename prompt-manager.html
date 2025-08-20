@@ -11874,6 +11874,388 @@ MDN文档,https://developer.mozilla.org,Web开发文档,开发工具,"文档,前
             
             showToast('排序已更新');
         }
+
+        // ==================== 云端同步和认证功能 ====================
+        
+        // 认证状态管理
+        let authState = {
+            isLoggedIn: false,
+            token: localStorage.getItem('authToken') || null,
+            lastSync: localStorage.getItem('lastSync') || null
+        };
+
+        // API 基础配置
+        const API_BASE = window.location.origin + '/api';
+
+        // 认证相关函数
+        async function showLoginModal() {
+            const modal = document.createElement('div');
+            modal.className = 'modal';
+            modal.innerHTML = `
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h3>登录云端同步</h3>
+                        <span class="close" onclick="this.closest('.modal').remove()">&times;</span>
+                    </div>
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <label for="loginPassword">密码:</label>
+                            <input type="password" id="loginPassword" class="form-control" placeholder="请输入密码" />
+                        </div>
+                        <div class="auth-actions">
+                            <button class="btn btn-primary" onclick="attemptLogin()">登录</button>
+                            <button class="btn btn-secondary" onclick="this.closest('.modal').remove()">取消</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+            
+            // 添加样式
+            if (!document.getElementById('authStyles')) {
+                const style = document.createElement('style');
+                style.id = 'authStyles';
+                style.textContent = `
+                    .modal {
+                        position: fixed;
+                        top: 0;
+                        left: 0;
+                        width: 100%;
+                        height: 100%;
+                        background: rgba(0,0,0,0.5);
+                        display: flex;
+                        justify-content: center;
+                        align-items: center;
+                        z-index: 10000;
+                    }
+                    .modal-content {
+                        background: white;
+                        padding: 20px;
+                        border-radius: 8px;
+                        width: 90%;
+                        max-width: 400px;
+                    }
+                    .modal-header {
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+                        margin-bottom: 20px;
+                    }
+                    .close {
+                        font-size: 24px;
+                        cursor: pointer;
+                    }
+                    .auth-actions {
+                        display: flex;
+                        gap: 10px;
+                        margin-top: 20px;
+                    }
+                    .sync-status {
+                        display: flex;
+                        align-items: center;
+                        gap: 8px;
+                        padding: 8px 12px;
+                        background: var(--surface-color);
+                        border-radius: var(--radius-md);
+                        border: 1px solid var(--border-color);
+                        font-size: var(--font-size-sm);
+                    }
+                    .sync-indicator {
+                        width: 8px;
+                        height: 8px;
+                        border-radius: 50%;
+                    }
+                    .sync-indicator.synced {
+                        background-color: var(--success-color);
+                    }
+                    .sync-indicator.offline {
+                        background-color: var(--secondary-color);
+                    }
+                    .sync-indicator.error {
+                        background-color: var(--danger-color);
+                    }
+                `;
+                document.head.appendChild(style);
+            }
+            
+            document.getElementById('loginPassword').focus();
+        }
+
+        async function attemptLogin() {
+            const password = document.getElementById('loginPassword').value;
+            if (!password) {
+                showToast('请输入密码', 'error');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/auth/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ password })
+                });
+
+                const result = await response.json();
+                
+                if (result.success) {
+                    authState.token = result.token;
+                    authState.isLoggedIn = true;
+                    localStorage.setItem('authToken', result.token);
+                    
+                    document.querySelector('.modal').remove();
+                    updateSyncStatus();
+                    showToast('登录成功', 'success');
+                    
+                    // 自动同步数据
+                    await syncToCloud();
+                } else {
+                    showToast(result.error || '登录失败', 'error');
+                }
+            } catch (error) {
+                console.error('Login error:', error);
+                showToast('登录失败，请检查网络连接', 'error');
+            }
+        }
+
+        async function logout() {
+            authState.isLoggedIn = false;
+            authState.token = null;
+            localStorage.removeItem('authToken');
+            updateSyncStatus();
+            showToast('已退出登录', 'info');
+        }
+
+        async function verifyToken() {
+            if (!authState.token) return false;
+            
+            try {
+                const response = await fetch(`${API_BASE}/auth/verify`, {
+                    headers: {
+                        'Authorization': `Bearer ${authState.token}`
+                    }
+                });
+                
+                const result = await response.json();
+                authState.isLoggedIn = result.valid;
+                return result.valid;
+            } catch (error) {
+                console.error('Token verification error:', error);
+                authState.isLoggedIn = false;
+                return false;
+            }
+        }
+
+        // 云端同步功能
+        async function syncToCloud() {
+            if (!authState.isLoggedIn) {
+                showToast('请先登录', 'warning');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/data/sync`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${authState.token}`
+                    },
+                    body: JSON.stringify(appData)
+                });
+
+                const result = await response.json();
+                
+                if (result.success) {
+                    const now = new Date().toISOString();
+                    authState.lastSync = now;
+                    localStorage.setItem('lastSync', now);
+                    updateSyncStatus();
+                    showToast('数据已同步到云端', 'success');
+                } else {
+                    throw new Error(result.error || '同步失败');
+                }
+            } catch (error) {
+                console.error('Sync error:', error);
+                showToast('同步失败: ' + error.message, 'error');
+                updateSyncStatus();
+            }
+        }
+
+        async function loadFromCloud() {
+            if (!authState.isLoggedIn) {
+                showToast('请先登录', 'warning');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/data/load`, {
+                    headers: {
+                        'Authorization': `Bearer ${authState.token}`
+                    }
+                });
+
+                const result = await response.json();
+                
+                if (result.data) {
+                    // 备份当前数据
+                    const backup = JSON.stringify(appData);
+                    localStorage.setItem('dataBackup', backup);
+                    
+                    // 加载云端数据
+                    appData = result.data;
+                    saveData();
+                    
+                    // 更新UI
+                    renderPrompts();
+                    renderWebsites();
+                    renderFilters();
+                    updateStats();
+                    
+                    authState.lastSync = result.lastSync;
+                    localStorage.setItem('lastSync', result.lastSync);
+                    updateSyncStatus();
+                    
+                    showToast('已从云端加载数据', 'success');
+                } else {
+                    showToast('云端暂无数据', 'info');
+                }
+            } catch (error) {
+                console.error('Load error:', error);
+                showToast('加载失败: ' + error.message, 'error');
+            }
+        }
+
+        function updateSyncStatus() {
+            let statusEl = document.querySelector('.sync-status');
+            if (!statusEl) {
+                // 创建同步状态显示元素
+                statusEl = document.createElement('div');
+                statusEl.className = 'sync-status';
+                
+                // 添加到头部工具栏
+                const toolbar = document.querySelector('.header-toolbar');
+                if (toolbar) {
+                    toolbar.appendChild(statusEl);
+                }
+            }
+
+            const indicator = document.createElement('span');
+            indicator.className = 'sync-indicator';
+            
+            let statusText = '';
+            if (authState.isLoggedIn) {
+                indicator.classList.add('synced');
+                statusText = `已登录 ${authState.lastSync ? '· 最后同步: ' + new Date(authState.lastSync).toLocaleString() : ''}`;
+            } else {
+                indicator.classList.add('offline');
+                statusText = '未登录';
+            }
+            
+            statusEl.innerHTML = '';
+            statusEl.appendChild(indicator);
+            statusEl.appendChild(document.createTextNode(statusText));
+        }
+
+        // 添加同步按钮到工具栏
+        function addSyncButtons() {
+            const toolbar = document.querySelector('.header-toolbar');
+            if (!toolbar) return;
+
+            // 创建同步按钮组
+            const syncGroup = document.createElement('div');
+            syncGroup.className = 'sync-buttons';
+            syncGroup.innerHTML = `
+                <button class="btn btn-sm btn-outline-primary" onclick="authState.isLoggedIn ? syncToCloud() : showLoginModal()" title="同步到云端">
+                    <span class="icon">☁️</span>
+                </button>
+                <button class="btn btn-sm btn-outline-secondary" onclick="authState.isLoggedIn ? loadFromCloud() : showLoginModal()" title="从云端加载">
+                    <span class="icon">⬇️</span>
+                </button>
+                <button class="btn btn-sm btn-outline-secondary" onclick="authState.isLoggedIn ? logout() : showLoginModal()" title="${authState.isLoggedIn ? '退出登录' : '登录'}">
+                    <span class="icon">${authState.isLoggedIn ? '🚪' : '🔑'}</span>
+                </button>
+            `;
+            
+            // 添加样式
+            const style = document.createElement('style');
+            style.textContent = `
+                .sync-buttons {
+                    display: flex;
+                    gap: 4px;
+                    margin-left: auto;
+                }
+                .sync-buttons .btn {
+                    padding: 4px 8px;
+                    min-width: 32px;
+                }
+                .sync-buttons .icon {
+                    font-size: 14px;
+                }
+            `;
+            document.head.appendChild(style);
+            
+            toolbar.appendChild(syncGroup);
+        }
+
+        // 初始化认证和同步功能
+        async function initCloudSync() {
+            // 验证已保存的token
+            if (authState.token) {
+                const isValid = await verifyToken();
+                if (!isValid) {
+                    localStorage.removeItem('authToken');
+                    authState.token = null;
+                }
+            }
+            
+            // 添加同步按钮
+            addSyncButtons();
+            updateSyncStatus();
+            
+            // 定期自动同步（每5分钟）
+            if (authState.isLoggedIn) {
+                setInterval(() => {
+                    if (authState.isLoggedIn) {
+                        syncToCloud();
+                    }
+                }, 5 * 60 * 1000);
+            }
+        }
+
+        // 在页面加载完成后初始化云端同步
+        document.addEventListener('DOMContentLoaded', function() {
+            // 原有的初始化代码...
+            setTimeout(initCloudSync, 1000); // 延迟初始化以确保DOM已准备好
+        });
+
+        // 增强原有的保存函数，自动云端同步
+        const originalSaveData = saveData;
+        saveData = function() {
+            originalSaveData.call(this);
+            
+            // 如果已登录，延迟同步到云端
+            if (authState.isLoggedIn) {
+                clearTimeout(window.autoSyncTimeout);
+                window.autoSyncTimeout = setTimeout(() => {
+                    syncToCloud();
+                }, 2000); // 2秒后自动同步
+            }
+        };
+
+        // 页面退出前同步
+        window.addEventListener('beforeunload', function() {
+            if (authState.isLoggedIn) {
+                // 同步数据（注意：这可能不会完成，因为页面即将关闭）
+                navigator.sendBeacon && navigator.sendBeacon(`${API_BASE}/data/sync`, JSON.stringify({
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${authState.token}`
+                    },
+                    body: JSON.stringify(appData)
+                }));
+            }
+        });
     </script>
 </body>
 </html>

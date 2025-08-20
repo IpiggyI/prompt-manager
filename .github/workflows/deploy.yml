@@ -1,0 +1,63 @@
+name: Deploy to Cloudflare Pages
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    name: Deploy to Cloudflare Pages
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build project
+        run: |
+          echo "Building project..."
+          # 这里可以添加构建步骤，目前我们的项目是纯静态文件
+          ls -la
+
+      - name: Deploy to Cloudflare Pages
+        uses: cloudflare/pages-action@v1
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          projectName: prompt-manager
+          directory: .
+          # 生产环境部署
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+
+  # 如果需要设置KV存储和环境变量，可以添加额外的job
+  setup-kv:
+    runs-on: ubuntu-latest
+    needs: deploy
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Wrangler
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+
+      - name: Create KV namespaces (if not exist)
+        run: |
+          # 检查并创建KV命名空间
+          echo "Setting up KV namespaces..."
+          # 注意：这些命令只在首次部署时需要，后续可以注释掉
+          # wrangler kv:namespace create "PROMPT_DATA" || true
+          # wrangler kv:namespace create "USER_AUTH" || true

@@ -1,0 +1,42 @@
+{
+  "name": "prompt-manager",
+  "version": "1.0.0",
+  "description": "云端同步的提示词管理工具，支持简单身份验证",
+  "main": "index.html",
+  "scripts": {
+    "dev": "wrangler pages dev --port 8080 --live-reload",
+    "deploy": "wrangler pages deploy . --project-name prompt-manager",
+    "deploy:prod": "wrangler pages deploy . --project-name prompt-manager --env production",
+    "preview": "wrangler pages deploy . --project-name prompt-manager-preview",
+    "login": "wrangler login",
+    "secret:set": "wrangler secret put AUTH_PASSWORD",
+    "kv:list": "wrangler kv:key list --binding PROMPT_DATA",
+    "kv:backup": "wrangler kv:key list --binding PROMPT_DATA --format json > backup.json",
+    "logs": "wrangler tail --format pretty",
+    "whoami": "wrangler whoami",
+    "setup": "npm install && wrangler login"
+  },
+  "devDependencies": {
+    "wrangler": "^3.0.0"
+  },
+  "keywords": [
+    "prompt",
+    "manager", 
+    "cloudflare",
+    "pages",
+    "ai",
+    "productivity",
+    "cloud-sync",
+    "authentication"
+  ],
+  "author": "YN",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/your-username/prompt-manager"
+  },
+  "bugs": {
+    "url": "https://github.com/your-username/prompt-manager/issues"
+  },
+  "homepage": "https://github.com/your-username/prompt-manager#readme"
+}
