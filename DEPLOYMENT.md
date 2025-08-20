@@ -27,9 +27,9 @@ git push -u origin main
 5. 选择你的 GitHub 仓库 `prompt-manager`
 6. 配置构建设置：
    - **Framework preset**: `None`
-   - **Build command**: `echo "Building..."` (或留空)
+   - **Build command**: 留空（不需要构建步骤）
    - **Build output directory**: `.` (当前目录)
-   - **Root directory**: `/` (根目录)
+   - **Root directory**: 留空（使用根目录）
 
 #### 步骤 3: 配置环境变量和KV存储
 在 Cloudflare Pages 项目设置中：
@@ -137,10 +137,9 @@ git push -u origin main
 
 ### 常见问题
 
-1. **GitHub 部署失败**
-   - 检查 GitHub Actions 工作流状态
-   - 确认 Cloudflare API Token 和 Account ID 正确设置
-   - 查看 Actions 日志获取详细错误信息
+1. **部署失败：wrangler.toml 错误**
+   - 问题已修复：移除了 wrangler.toml 文件
+   - Cloudflare Pages 使用自己的配置系统，不需要 wrangler.toml
 
 2. **Functions 不工作**
    - 确认 KV 命名空间绑定正确
@@ -152,9 +151,10 @@ git push -u origin main
    - 确认登录状态和 Token 有效性
    - 检查 API 端点响应
 
-4. **首次访问404**
-   - 确认 `index.html` 存在于根目录
-   - 检查 Pages 项目的构建输出目录设置
+4. **访问问题**
+   - 确认部署成功完成
+   - 检查 Pages 项目的自定义域名设置
+   - 使用提供的 `.pages.dev` 域名进行测试
 
 ### 调试和日志
 - **Pages Dashboard**: 查看部署状态和构建日志
