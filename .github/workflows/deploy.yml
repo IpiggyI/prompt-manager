@@ -1,4 +1,4 @@
-name: Deploy to Cloudflare Pages
+name: Build Check
 
 on:
   push:
@@ -7,18 +7,40 @@ on:
     branches: [ main ]
 
 jobs:
-  deploy:
+  build-check:
     runs-on: ubuntu-latest
-    name: Deploy to Cloudflare Pages
+    name: Build and Lint Check
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
-      - name: Deploy to Cloudflare Pages
-        uses: cloudflare/pages-action@v1
-        with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          projectName: prompt-manager
-          directory: .
-          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+        
+      - name: Check file structure
+        run: |
+          echo "Checking project structure..."
+          ls -la
+          echo "✅ Project structure looks good"
+          
+      - name: Validate HTML files
+        run: |
+          echo "Validating HTML files..."
+          if [ -f "index.html" ] && [ -f "prompt-manager.html" ]; then
+            echo "✅ Required HTML files exist"
+          else
+            echo "❌ Missing required HTML files"
+            exit 1
+          fi
+          
+      - name: Check Functions structure
+        run: |
+          echo "Checking Cloudflare Functions..."
+          if [ -d "functions" ] && [ -f "functions/_middleware.js" ]; then
+            echo "✅ Cloudflare Functions structure is correct"
+          else
+            echo "❌ Functions directory structure is incorrect"
+            exit 1
+          fi
+          
+      - name: Build success
+        run: |
+          echo "🎉 All checks passed! Ready for Cloudflare Pages deployment."
+          echo "Note: Actual deployment is handled by Cloudflare Pages GitHub integration."

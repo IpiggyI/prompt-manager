@@ -11897,10 +11897,6 @@ MDN文档,https://developer.mozilla.org,Web开发文档,开发工具,"文档,前
                 existingModal.remove();
             }
             
-            // 关闭所有其他模态框
-            const allModals = document.querySelectorAll('.modal');
-            allModals.forEach(modal => modal.remove());
-            
             const modal = document.createElement('div');
             modal.className = 'modal login-modal';
             modal.innerHTML = `
@@ -11928,17 +11924,17 @@ MDN文档,https://developer.mozilla.org,Web开发文档,开发工具,"文档,前
                 const style = document.createElement('style');
                 style.id = 'authStyles';
                 style.textContent = `
-                    .modal {
+                    .login-modal {
                         position: fixed;
                         top: 0;
                         left: 0;
                         width: 100%;
                         height: 100%;
-                        background: rgba(0,0,0,0.5);
+                        background: rgba(0,0,0,0.6);
                         display: flex;
                         justify-content: center;
                         align-items: center;
-                        z-index: 10000;
+                        z-index: 10001;
                     }
                     .modal-content {
                         background: white;
@@ -12260,10 +12256,18 @@ MDN文档,https://developer.mozilla.org,Web开发文档,开发工具,"文档,前
                         justify-content: space-between;
                         align-items: center;
                         flex-wrap: wrap;
-                        gap: 16px;
+                        gap: 12px;
+                        min-height: 60px;
                     }
                     .header > div:first-child {
                         flex: 1;
+                        min-width: 0;
+                    }
+                    .header-controls {
+                        display: flex;
+                        align-items: center;
+                        gap: 12px;
+                        flex-shrink: 0;
                     }
                     .theme-toggle {
                         order: 2;
@@ -12271,17 +12275,37 @@ MDN文档,https://developer.mozilla.org,Web开发文档,开发工具,"文档,前
                     .sync-buttons {
                         order: 1;
                     }
+                    @media (max-width: 768px) {
+                        .header {
+                            flex-direction: column;
+                            align-items: stretch;
+                            gap: 12px;
+                        }
+                        .header-controls {
+                            justify-content: center;
+                        }
+                    }
                 `;
                 document.head.appendChild(style);
             }
             
-            // 插入到主题按钮之前
-            const themeToggle = header.querySelector('.theme-toggle');
-            if (themeToggle) {
-                header.insertBefore(syncGroup, themeToggle);
-            } else {
-                header.appendChild(syncGroup);
+            // 创建或获取控制容器
+            let controlsContainer = header.querySelector('.header-controls');
+            if (!controlsContainer) {
+                controlsContainer = document.createElement('div');
+                controlsContainer.className = 'header-controls';
+                
+                // 移动现有的主题按钮到控制容器
+                const themeToggle = header.querySelector('.theme-toggle');
+                if (themeToggle) {
+                    controlsContainer.appendChild(themeToggle);
+                }
+                
+                header.appendChild(controlsContainer);
             }
+            
+            // 将同步按钮组添加到控制容器的开头
+            controlsContainer.insertBefore(syncGroup, controlsContainer.firstChild);
         }
 
         // 初始化认证和同步功能
