@@ -3576,93 +3576,134 @@
             }
         }
         
-        /* 优化后的添加提示词模态框样式 */
-        .modal-optimized .modal-content {
-            width: 90%;
-            max-width: 900px;
-            max-height: 90vh;
+        /* 全屏式的添加/查看提示词模态框 */
+        .modal-fullscreen .modal-content {
+            width: 95vw;
+            height: 90vh;
+            max-width: none;
+            max-height: none;
+            display: flex;
+            flex-direction: column;
         }
         
-        .prompt-form {
+        .modal-fullscreen .modal-header {
+            flex-shrink: 0;
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .modal-fullscreen .modal-body {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            overflow: hidden;
+        }
+        
+        .prompt-form-fullscreen {
             display: grid;
-            grid-template-rows: 1fr auto auto;
-            gap: 20px;
+            grid-template-columns: 2fr 1fr;
+            gap: 24px;
             height: 100%;
-            min-height: 500px;
         }
         
-        .form-content-main {
+        .form-main-area {
             display: flex;
             flex-direction: column;
-            gap: 12px;
-            flex: 1;
+            gap: 16px;
         }
         
-        .content-group {
+        .form-main-area .form-group:first-child {
+            flex-shrink: 0;
+        }
+        
+        .form-main-area .content-group {
             flex: 1;
             display: flex;
             flex-direction: column;
         }
         
-        .content-group .textarea-large {
+        .textarea-fullscreen {
             flex: 1;
-            min-height: 300px;
-            resize: vertical;
+            resize: none;
+            min-height: 400px;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 14px;
+            line-height: 1.5;
         }
         
-        .form-metadata {
+        .form-sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
             background: var(--background-color);
-            padding: 15px;
-            border-radius: var(--radius-md);
+            padding: 20px;
+            border-radius: var(--radius-lg);
             border: 1px solid var(--border-light);
         }
         
-        .metadata-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 16px;
-            margin-bottom: 12px;
+        .sidebar-section {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
         }
         
-        .form-control-sm {
-            font-size: var(--font-size-sm);
-            padding: 6px 8px;
+        .sidebar-section .form-label {
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 4px;
         }
         
-        .form-actions {
+        .form-actions-fullscreen {
+            margin-top: auto;
+            padding-top: 20px;
+            border-top: 1px solid var(--border-light);
             display: flex;
             gap: 12px;
             justify-content: flex-end;
-            flex-wrap: wrap;
+        }
+        
+        /* 移动端适配 */
+        @media (max-width: 1024px) {
+            .prompt-form-fullscreen {
+                grid-template-columns: 1fr;
+                grid-template-rows: 1fr auto;
+            }
+            
+            .form-sidebar {
+                order: 2;
+            }
+            
+            .textarea-fullscreen {
+                min-height: 300px;
+            }
         }
         
         @media (max-width: 768px) {
-            .metadata-grid {
-                grid-template-columns: 1fr;
-                gap: 12px;
+            .modal-fullscreen .modal-content {
+                width: 100vw;
+                height: 100vh;
+                border-radius: 0;
             }
             
-            .form-actions {
-                justify-content: stretch;
+            .modal-fullscreen .modal-body {
+                padding: 16px;
             }
             
-            .form-actions .btn {
-                flex: 1;
-            }
-        }
-        
-        @media (max-width: 600px) {
-            .modal-optimized .modal-content {
-                width: 95%;
-                max-height: 95vh;
+            .prompt-form-fullscreen {
+                gap: 16px;
             }
             
-            .prompt-form {
-                min-height: 400px;
+            .form-sidebar {
+                padding: 16px;
             }
             
-            .content-group .textarea-large {
-                min-height: 200px;
+            .form-actions-fullscreen {
+                flex-direction: column;
+            }
+            
+            .form-actions-fullscreen .btn {
+                width: 100%;
             }
         }
         
@@ -4471,53 +4512,63 @@ Stack Overflow - https://stackoverflow.com - 程序员问答社区\n解决编程
 
     <!-- 添加提示词模态框 -->
     <div id="addPromptModal" class="modal">
-        <div class="modal-content modal-optimized">
+        <div class="modal-content modal-fullscreen">
             <div class="modal-header">
                 <div class="modal-title">添加提示词</div>
                 <button class="close-btn" onclick="closeModal('addPromptModal')">&times;</button>
             </div>
-            <form onsubmit="savePrompt(event)" class="prompt-form">
-                <!-- 主要内容区 -->
-                <div class="form-content-main">
-                    <div class="form-group">
-                        <label class="form-label">标题</label>
-                        <input type="text" class="form-control" id="promptTitle" required>
-                    </div>
-                    <div class="form-group content-group">
-                        <label class="form-label">提示词内容</label>
-                        <textarea class="textarea textarea-large" id="promptContent" required placeholder="输入提示词内容..." rows="12"></textarea>
-                    </div>
-                </div>
-                
-                <!-- 次要信息区 -->
-                <div class="form-metadata">
-                    <div class="metadata-grid">
+            <div class="modal-body">
+                <form onsubmit="savePrompt(event)" class="prompt-form-fullscreen">
+                    <!-- 主内容区域 -->
+                    <div class="form-main-area">
                         <div class="form-group">
+                            <label class="form-label">标题</label>
+                            <input type="text" class="form-control" id="promptTitle" required>
+                        </div>
+                        <div class="content-group">
+                            <label class="form-label">提示词内容</label>
+                            <textarea class="textarea-fullscreen" id="promptContent" required placeholder="输入提示词内容..."></textarea>
+                        </div>
+                        <div class="form-actions-fullscreen">
+                            <button type="button" class="btn btn-warning" onclick="clearPromptForm()">🗑️ 清除</button>
+                            <button type="button" class="btn btn-secondary" onclick="closeModal('addPromptModal')">取消</button>
+                            <button type="submit" class="btn btn-primary">保存</button>
+                        </div>
+                    </div>
+                    
+                    <!-- 右侧元数据区域 -->
+                    <div class="form-sidebar">
+                        <div class="sidebar-section">
                             <label class="form-label">分类</label>
-                            <input type="text" class="form-control form-control-sm" id="promptCategoryInput" list="promptCategories" placeholder="工作/开发/AI">
+                            <input type="text" class="form-control" id="promptCategoryInput" list="promptCategories" placeholder="工作/开发/AI">
                             <datalist id="promptCategories"></datalist>
                         </div>
-                        <div class="form-group">
+                        
+                        <div class="sidebar-section">
                             <label class="form-label">标签</label>
-                            <input type="text" class="form-control form-control-sm" id="promptTags" placeholder="工作,效率,AI">
+                            <input type="text" class="form-control" id="promptTags" placeholder="工作,效率,AI">
                             <div class="tags-suggestions" id="promptTagsSuggestions"></div>
                         </div>
-                    </div>
-                    <div class="form-group">
-                        <div class="checkbox-item">
-                            <input type="checkbox" id="promptPinned">
-                            <label for="promptPinned">置顶此提示词</label>
+                        
+                        <div class="sidebar-section">
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="promptPinned">
+                                <label for="promptPinned">置顶此提示词</label>
+                            </div>
+                        </div>
+                        
+                        <!-- 预览区域 -->
+                        <div class="sidebar-section">
+                            <label class="form-label">预览</label>
+                            <div style="font-size: 12px; color: var(--text-secondary); padding: 12px; background: var(--surface-color); border-radius: var(--radius-md); border: 1px solid var(--border-light);">
+                                <div><strong>标题：</strong><span id="previewTitle">未填写</span></div>
+                                <div style="margin-top: 8px;"><strong>分类：</strong><span id="previewCategory">默认</span></div>
+                                <div style="margin-top: 8px;"><strong>字数：</strong><span id="previewWordCount">0</span></div>
+                            </div>
                         </div>
                     </div>
-                </div>
-                
-                <!-- 操作按钮 -->
-                <div class="form-actions">
-                    <button type="button" class="btn btn-warning" onclick="clearPromptForm()">🗑️ 清除</button>
-                    <button type="button" class="btn btn-secondary" onclick="closeModal('addPromptModal')">取消</button>
-                    <button type="submit" class="btn btn-primary">保存</button>
-                </div>
-            </form>
+                </form>
+            </div>
         </div>
     </div>
 
@@ -4613,40 +4664,67 @@ Stack Overflow - https://stackoverflow.com - 程序员问答社区\n解决编程
 
     <!-- 查看提示词模态框 -->
     <div id="viewPromptModal" class="modal">
-        <div class="modal-content modal-large">
+        <div class="modal-content modal-fullscreen">
             <div class="modal-header">
                 <div class="modal-title" id="viewPromptTitle">查看提示词</div>
                 <button class="close-btn" onclick="closeModal('viewPromptModal')">&times;</button>
             </div>
             <div class="modal-body">
-                <div class="view-prompt-meta">
-                    <div class="meta-item">
-                        <span class="meta-label">分类:</span>
-                        <span id="viewPromptCategory"></span>
+                <div class="prompt-form-fullscreen">
+                    <!-- 主内容区域 -->
+                    <div class="form-main-area">
+                        <div class="form-group">
+                            <label class="form-label">提示词内容</label>
+                            <textarea class="textarea-fullscreen" id="viewPromptContent" readonly></textarea>
+                        </div>
+                        <div class="form-actions-fullscreen">
+                            <button class="btn btn-success" onclick="copyPromptFromView()">📋 复制内容</button>
+                            <button class="btn btn-primary" onclick="editPromptFromView()">✏️ 编辑</button>
+                            <button class="btn btn-secondary" onclick="closeModal('viewPromptModal')">关闭</button>
+                        </div>
                     </div>
-                    <div class="meta-item">
-                        <span class="meta-label">标签:</span>
-                        <span id="viewPromptTags"></span>
+                    
+                    <!-- 右侧元数据区域 -->
+                    <div class="form-sidebar">
+                        <div class="sidebar-section">
+                            <label class="form-label">基本信息</label>
+                            <div class="view-prompt-meta">
+                                <div class="meta-item">
+                                    <span class="meta-label">分类:</span>
+                                    <span id="viewPromptCategory"></span>
+                                </div>
+                                <div class="meta-item">
+                                    <span class="meta-label">标签:</span>
+                                    <span id="viewPromptTags"></span>
+                                </div>
+                                <div class="meta-item">
+                                    <span class="meta-label">使用次数:</span>
+                                    <span id="viewPromptUsage"></span>
+                                </div>
+                                <div class="meta-item">
+                                    <span class="meta-label">创建时间:</span>
+                                    <span id="viewPromptDate"></span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="sidebar-section">
+                            <label class="form-label">统计信息</label>
+                            <div style="font-size: 12px; color: var(--text-secondary); padding: 12px; background: var(--surface-color); border-radius: var(--radius-md); border: 1px solid var(--border-light);">
+                                <div><strong>字数：</strong><span id="viewWordCount">0</span></div>
+                                <div style="margin-top: 8px;"><strong>行数：</strong><span id="viewLineCount">0</span></div>
+                                <div style="margin-top: 8px;"><strong>段落：</strong><span id="viewParagraphCount">0</span></div>
+                            </div>
+                        </div>
+                        
+                        <div class="sidebar-section">
+                            <label class="form-label">操作历史</label>
+                            <div style="font-size: 12px; color: var(--text-secondary); padding: 12px; background: var(--surface-color); border-radius: var(--radius-md); border: 1px solid var(--border-light);">
+                                <div>上次使用：<span id="lastUsedTime">从未使用</span></div>
+                                <div style="margin-top: 8px;">最近修改：<span id="lastModified">未修改</span></div>
+                            </div>
+                        </div>
                     </div>
-                    <div class="meta-item">
-                        <span class="meta-label">使用次数:</span>
-                        <span id="viewPromptUsage"></span>
-                    </div>
-                    <div class="meta-item">
-                        <span class="meta-label">创建时间:</span>
-                        <span id="viewPromptDate"></span>
-                    </div>
-                </div>
-                
-                <div class="form-group">
-                    <label class="form-label">提示词内容</label>
-                    <textarea class="form-control" id="viewPromptContent" readonly rows="12"></textarea>
-                </div>
-                
-                <div class="view-prompt-actions">
-                    <button class="btn btn-success" onclick="copyPromptFromView()">📋 复制内容</button>
-                    <button class="btn btn-primary" onclick="editPromptFromView()">✏️ 编辑</button>
-                    <button class="btn btn-secondary" onclick="closeModal('viewPromptModal')">关闭</button>
                 </div>
             </div>
         </div>
