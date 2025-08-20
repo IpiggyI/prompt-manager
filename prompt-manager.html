@@ -4537,6 +4537,8 @@ Stack Overflow - https://stackoverflow.com - 程序员问答社区\n解决编程
             initFilterPanelStates();
             // 初始化测试面板同步滚动
             initTestPanelSyncScroll();
+            // 初始化云端同步功能
+            initCloudSync();
         });
 
         // 初始化主题
@@ -12127,75 +12129,135 @@ MDN文档,https://developer.mozilla.org,Web开发文档,开发工具,"文档,前
         }
 
         function updateSyncStatus() {
+            // 更新同步按钮状态
+            const loginBtn = document.querySelector('.sync-buttons button:last-child');
+            if (loginBtn) {
+                loginBtn.innerHTML = authState.isLoggedIn ? '🚪' : '🔑';
+                loginBtn.title = authState.isLoggedIn ? '退出登录' : '登录';
+            }
+            
+            // 创建或更新同步状态显示
             let statusEl = document.querySelector('.sync-status');
             if (!statusEl) {
-                // 创建同步状态显示元素
                 statusEl = document.createElement('div');
                 statusEl.className = 'sync-status';
                 
-                // 添加到头部工具栏
-                const toolbar = document.querySelector('.header-toolbar');
-                if (toolbar) {
-                    toolbar.appendChild(statusEl);
+                // 添加到同步按钮组中
+                const syncButtons = document.querySelector('.sync-buttons');
+                if (syncButtons) {
+                    syncButtons.appendChild(statusEl);
                 }
             }
 
-            const indicator = document.createElement('span');
-            indicator.className = 'sync-indicator';
-            
-            let statusText = '';
-            if (authState.isLoggedIn) {
-                indicator.classList.add('synced');
-                statusText = `已登录 ${authState.lastSync ? '· 最后同步: ' + new Date(authState.lastSync).toLocaleString() : ''}`;
-            } else {
-                indicator.classList.add('offline');
-                statusText = '未登录';
+            if (statusEl) {
+                const indicator = document.createElement('span');
+                indicator.className = 'sync-indicator';
+                
+                let statusText = '';
+                if (authState.isLoggedIn) {
+                    indicator.classList.add('synced');
+                    statusText = `已登录`;
+                } else {
+                    indicator.classList.add('offline');
+                    statusText = '未登录';
+                }
+                
+                statusEl.innerHTML = '';
+                statusEl.appendChild(indicator);
+                statusEl.appendChild(document.createTextNode(statusText));
             }
-            
-            statusEl.innerHTML = '';
-            statusEl.appendChild(indicator);
-            statusEl.appendChild(document.createTextNode(statusText));
         }
 
-        // 添加同步按钮到工具栏
+        // 添加同步按钮到头部
         function addSyncButtons() {
-            const toolbar = document.querySelector('.header-toolbar');
-            if (!toolbar) return;
+            const header = document.querySelector('.header');
+            if (!header) return;
+
+            // 检查是否已经添加过同步按钮
+            if (header.querySelector('.sync-buttons')) return;
 
             // 创建同步按钮组
             const syncGroup = document.createElement('div');
             syncGroup.className = 'sync-buttons';
             syncGroup.innerHTML = `
-                <button class="btn btn-sm btn-outline-primary" onclick="authState.isLoggedIn ? syncToCloud() : showLoginModal()" title="同步到云端">
-                    <span class="icon">☁️</span>
+                <button class="sync-btn" onclick="authState.isLoggedIn ? syncToCloud() : showLoginModal()" title="同步到云端">
+                    ☁️
                 </button>
-                <button class="btn btn-sm btn-outline-secondary" onclick="authState.isLoggedIn ? loadFromCloud() : showLoginModal()" title="从云端加载">
-                    <span class="icon">⬇️</span>
+                <button class="sync-btn" onclick="authState.isLoggedIn ? loadFromCloud() : showLoginModal()" title="从云端加载">
+                    ⬇️
                 </button>
-                <button class="btn btn-sm btn-outline-secondary" onclick="authState.isLoggedIn ? logout() : showLoginModal()" title="${authState.isLoggedIn ? '退出登录' : '登录'}">
-                    <span class="icon">${authState.isLoggedIn ? '🚪' : '🔑'}</span>
+                <button class="sync-btn" onclick="authState.isLoggedIn ? logout() : showLoginModal()" title="${authState.isLoggedIn ? '退出登录' : '登录'}">
+                    ${authState.isLoggedIn ? '🚪' : '🔑'}
                 </button>
             `;
             
             // 添加样式
-            const style = document.createElement('style');
-            style.textContent = `
-                .sync-buttons {
-                    display: flex;
-                    gap: 4px;
-                    margin-left: auto;
-                }
-                .sync-buttons .btn {
-                    padding: 4px 8px;
-                    min-width: 32px;
-                }
-                .sync-buttons .icon {
-                    font-size: 14px;
-                }
-            `;
-            document.head.appendChild(style);
+            if (!document.getElementById('syncStyles')) {
+                const style = document.createElement('style');
+                style.id = 'syncStyles';
+                style.textContent = `
+                    .sync-buttons {
+                        display: flex;
+                        gap: 8px;
+                        align-items: center;
+                    }
+                    .sync-btn {
+                        background: var(--surface-color);
+                        border: 1px solid var(--border-color);
+                        border-radius: var(--radius-md);
+                        padding: 8px 12px;
+                        cursor: pointer;
+                        font-size: 16px;
+                        transition: all 0.2s ease;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        min-width: 40px;
+                        height: 40px;
+                    }
+                    .sync-btn:hover {
+                        background: var(--primary-light);
+                        border-color: var(--primary-color);
+                        transform: translateY(-1px);
+                    }
+                    .header {
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+                        flex-wrap: wrap;
+                        gap: 16px;
+                    }
+                    .header > div:first-child {
+                        flex: 1;
+                    }
+                    .theme-toggle {
+                        order: 2;
+                    }
+                    .sync-buttons {
+                        order: 1;
+                    }
+                    .sync-status {
+                        display: flex;
+                        align-items: center;
+                        gap: 4px;
+                        font-size: 12px;
+                        color: var(--text-secondary);
+                        padding: 4px 8px;
+                        background: var(--background-color);
+                        border-radius: var(--radius-sm);
+                        margin-left: 8px;
+                    }
+                `;
+                document.head.appendChild(style);
+            }
             
-            toolbar.appendChild(syncGroup);
+            // 插入到主题按钮之前
+            const themeToggle = header.querySelector('.theme-toggle');
+            if (themeToggle) {
+                header.insertBefore(syncGroup, themeToggle);
+            } else {
+                header.appendChild(syncGroup);
+            }
         }
 
         // 初始化认证和同步功能
@@ -12223,11 +12285,6 @@ MDN文档,https://developer.mozilla.org,Web开发文档,开发工具,"文档,前
             }
         }
 
-        // 在页面加载完成后初始化云端同步
-        document.addEventListener('DOMContentLoaded', function() {
-            // 原有的初始化代码...
-            setTimeout(initCloudSync, 1000); // 延迟初始化以确保DOM已准备好
-        });
 
         // 增强原有的保存函数，自动云端同步
         const originalSaveData = saveData;
