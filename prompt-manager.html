@@ -3578,8 +3578,8 @@
         
         /* 全屏式的添加/查看提示词模态框 */
         .modal-fullscreen .modal-content {
-            width: 95vw;
-            height: 90vh;
+            width: 98vw;
+            height: 95vh;
             max-width: none;
             max-height: none;
             display: flex;
@@ -3588,7 +3588,7 @@
         
         .modal-fullscreen .modal-header {
             flex-shrink: 0;
-            padding: 16px 20px;
+            padding: 16px 24px;
             border-bottom: 1px solid var(--border-color);
         }
         
@@ -3596,21 +3596,38 @@
             flex: 1;
             display: flex;
             flex-direction: column;
-            padding: 20px;
+            padding: 24px;
             overflow: hidden;
         }
         
         .prompt-form-fullscreen {
             display: grid;
-            grid-template-columns: 2fr 1fr;
+            grid-template-columns: 250px 1fr 300px;
             gap: 24px;
             height: 100%;
         }
         
+        /* 左侧元数据区域 */
+        .form-left-sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            background: var(--background-color);
+            padding: 20px;
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--border-light);
+            overflow-y: auto;
+        }
+        
+        /* 中间主内容区域 */
         .form-main-area {
             display: flex;
             flex-direction: column;
             gap: 16px;
+            background: var(--surface-color);
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-lg);
+            padding: 24px;
         }
         
         .form-main-area .form-group:first-child {
@@ -3626,13 +3643,23 @@
         .textarea-fullscreen {
             flex: 1;
             resize: none;
-            min-height: 400px;
+            min-height: 500px;
             font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
-            font-size: 14px;
-            line-height: 1.5;
+            font-size: 15px;
+            line-height: 1.6;
+            padding: 20px;
+            border: 2px solid var(--border-color);
+            border-radius: var(--radius-md);
+            background: var(--surface-color);
         }
         
-        .form-sidebar {
+        .textarea-fullscreen:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+        }
+        
+        /* 右侧操作区域 */
+        .form-right-sidebar {
             display: flex;
             flex-direction: column;
             gap: 20px;
@@ -3640,6 +3667,7 @@
             padding: 20px;
             border-radius: var(--radius-lg);
             border: 1px solid var(--border-light);
+            overflow-y: auto;
         }
         
         .sidebar-section {
@@ -3661,21 +3689,61 @@
             display: flex;
             gap: 12px;
             justify-content: flex-end;
+            flex-wrap: wrap;
+        }
+        
+        .form-actions-fullscreen .btn {
+            flex: 1;
+            min-width: 80px;
+        }
+        
+        /* 平板端适配 */
+        @media (max-width: 1200px) {
+            .prompt-form-fullscreen {
+                grid-template-columns: 200px 1fr 250px;
+                gap: 16px;
+            }
+            
+            .modal-fullscreen .modal-body {
+                padding: 16px;
+            }
         }
         
         /* 移动端适配 */
-        @media (max-width: 1024px) {
+        @media (max-width: 768px) {
             .prompt-form-fullscreen {
                 grid-template-columns: 1fr;
-                grid-template-rows: 1fr auto;
+                grid-template-rows: auto 1fr auto;
+                gap: 16px;
             }
             
-            .form-sidebar {
+            .form-left-sidebar {
+                order: 1;
+                max-height: 200px;
+            }
+            
+            .form-main-area {
                 order: 2;
+            }
+            
+            .form-right-sidebar {
+                order: 3;
+                max-height: 250px;
             }
             
             .textarea-fullscreen {
                 min-height: 300px;
+                font-size: 14px;
+                padding: 16px;
+            }
+            
+            .form-actions-fullscreen {
+                flex-direction: column;
+            }
+            
+            .form-actions-fullscreen .btn {
+                width: 100%;
+                flex: none;
             }
         }
         
@@ -4519,33 +4587,16 @@ Stack Overflow - https://stackoverflow.com - 程序员问答社区\n解决编程
             </div>
             <div class="modal-body">
                 <form onsubmit="savePrompt(event)" class="prompt-form-fullscreen">
-                    <!-- 主内容区域 -->
-                    <div class="form-main-area">
-                        <div class="form-group">
-                            <label class="form-label">标题</label>
-                            <input type="text" class="form-control" id="promptTitle" required>
-                        </div>
-                        <div class="content-group">
-                            <label class="form-label">提示词内容</label>
-                            <textarea class="textarea-fullscreen" id="promptContent" required placeholder="输入提示词内容..."></textarea>
-                        </div>
-                        <div class="form-actions-fullscreen">
-                            <button type="button" class="btn btn-warning" onclick="clearPromptForm()">🗑️ 清除</button>
-                            <button type="button" class="btn btn-secondary" onclick="closeModal('addPromptModal')">取消</button>
-                            <button type="submit" class="btn btn-primary">保存</button>
-                        </div>
-                    </div>
-                    
-                    <!-- 右侧元数据区域 -->
-                    <div class="form-sidebar">
+                    <!-- 左侧元数据区域 -->
+                    <div class="form-left-sidebar">
                         <div class="sidebar-section">
-                            <label class="form-label">分类</label>
+                            <label class="form-label">📁 分类</label>
                             <input type="text" class="form-control" id="promptCategoryInput" list="promptCategories" placeholder="工作/开发/AI">
                             <datalist id="promptCategories"></datalist>
                         </div>
                         
                         <div class="sidebar-section">
-                            <label class="form-label">标签</label>
+                            <label class="form-label">🏷️ 标签</label>
                             <input type="text" class="form-control" id="promptTags" placeholder="工作,效率,AI">
                             <div class="tags-suggestions" id="promptTagsSuggestions"></div>
                         </div>
@@ -4553,18 +4604,59 @@ Stack Overflow - https://stackoverflow.com - 程序员问答社区\n解决编程
                         <div class="sidebar-section">
                             <div class="checkbox-item">
                                 <input type="checkbox" id="promptPinned">
-                                <label for="promptPinned">置顶此提示词</label>
+                                <label for="promptPinned">📌 置顶此提示词</label>
                             </div>
                         </div>
                         
                         <!-- 预览区域 -->
                         <div class="sidebar-section">
-                            <label class="form-label">预览</label>
+                            <label class="form-label">👁️ 实时预览</label>
                             <div style="font-size: 12px; color: var(--text-secondary); padding: 12px; background: var(--surface-color); border-radius: var(--radius-md); border: 1px solid var(--border-light);">
                                 <div><strong>标题：</strong><span id="previewTitle">未填写</span></div>
                                 <div style="margin-top: 8px;"><strong>分类：</strong><span id="previewCategory">默认</span></div>
                                 <div style="margin-top: 8px;"><strong>字数：</strong><span id="previewWordCount">0</span></div>
+                                <div style="margin-top: 8px;"><strong>行数：</strong><span id="previewLineCount">0</span></div>
                             </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 中间主内容区域 -->
+                    <div class="form-main-area">
+                        <div class="form-group">
+                            <label class="form-label">📝 标题</label>
+                            <input type="text" class="form-control" id="promptTitle" required style="font-size: 16px; padding: 12px;">
+                        </div>
+                        <div class="content-group">
+                            <label class="form-label">💬 提示词内容</label>
+                            <textarea class="textarea-fullscreen" id="promptContent" required placeholder="在此输入您的提示词内容...\n\n支持多行文本、代码片段和格式化内容。\n可以使用 Markdown 语法进行格式化。"></textarea>
+                        </div>
+                    </div>
+                    
+                    <!-- 右侧操作区域 -->
+                    <div class="form-right-sidebar">
+                        <div class="sidebar-section">
+                            <label class="form-label">⚡ 快速操作</label>
+                            <div style="display: flex; flex-direction: column; gap: 8px;">
+                                <button type="button" class="btn btn-sm btn-secondary" onclick="insertTemplate('role')" style="width: 100%;">🎭 角色模板</button>
+                                <button type="button" class="btn btn-sm btn-secondary" onclick="insertTemplate('task')" style="width: 100%;">📋 任务模板</button>
+                                <button type="button" class="btn btn-sm btn-secondary" onclick="insertTemplate('format')" style="width: 100%;">📄 格式模板</button>
+                            </div>
+                        </div>
+                        
+                        <div class="sidebar-section">
+                            <label class="form-label">📊 文本分析</label>
+                            <div style="font-size: 12px; color: var(--text-secondary); padding: 12px; background: var(--surface-color); border-radius: var(--radius-md); border: 1px solid var(--border-light);">
+                                <div>字符数：<span id="charCount">0</span></div>
+                                <div style="margin-top: 8px;">词数：<span id="wordCount">0</span></div>
+                                <div style="margin-top: 8px;">行数：<span id="lineCount">0</span></div>
+                                <div style="margin-top: 8px;">段落：<span id="paragraphCount">0</span></div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-actions-fullscreen">
+                            <button type="button" class="btn btn-warning" onclick="clearPromptForm()">🗑️ 清除</button>
+                            <button type="button" class="btn btn-secondary" onclick="closeModal('addPromptModal')">❌ 取消</button>
+                            <button type="submit" class="btn btn-primary">✅ 保存</button>
                         </div>
                     </div>
                 </form>
@@ -4671,23 +4763,10 @@ Stack Overflow - https://stackoverflow.com - 程序员问答社区\n解决编程
             </div>
             <div class="modal-body">
                 <div class="prompt-form-fullscreen">
-                    <!-- 主内容区域 -->
-                    <div class="form-main-area">
-                        <div class="form-group">
-                            <label class="form-label">提示词内容</label>
-                            <textarea class="textarea-fullscreen" id="viewPromptContent" readonly></textarea>
-                        </div>
-                        <div class="form-actions-fullscreen">
-                            <button class="btn btn-success" onclick="copyPromptFromView()">📋 复制内容</button>
-                            <button class="btn btn-primary" onclick="editPromptFromView()">✏️ 编辑</button>
-                            <button class="btn btn-secondary" onclick="closeModal('viewPromptModal')">关闭</button>
-                        </div>
-                    </div>
-                    
-                    <!-- 右侧元数据区域 -->
-                    <div class="form-sidebar">
+                    <!-- 左侧基本信息区域 -->
+                    <div class="form-left-sidebar">
                         <div class="sidebar-section">
-                            <label class="form-label">基本信息</label>
+                            <label class="form-label">📁 基本信息</label>
                             <div class="view-prompt-meta">
                                 <div class="meta-item">
                                     <span class="meta-label">分类:</span>
@@ -4709,20 +4788,55 @@ Stack Overflow - https://stackoverflow.com - 程序员问答社区\n解决编程
                         </div>
                         
                         <div class="sidebar-section">
-                            <label class="form-label">统计信息</label>
+                            <label class="form-label">📊 统计信息</label>
                             <div style="font-size: 12px; color: var(--text-secondary); padding: 12px; background: var(--surface-color); border-radius: var(--radius-md); border: 1px solid var(--border-light);">
-                                <div><strong>字数：</strong><span id="viewWordCount">0</span></div>
+                                <div><strong>字符数：</strong><span id="viewCharCount">0</span></div>
+                                <div style="margin-top: 8px;"><strong>词数：</strong><span id="viewWordCount">0</span></div>
                                 <div style="margin-top: 8px;"><strong>行数：</strong><span id="viewLineCount">0</span></div>
                                 <div style="margin-top: 8px;"><strong>段落：</strong><span id="viewParagraphCount">0</span></div>
                             </div>
                         </div>
+                    </div>
+                    
+                    <!-- 中间主内容区域 -->
+                    <div class="form-main-area">
+                        <div class="content-group">
+                            <label class="form-label">💬 提示词内容</label>
+                            <textarea class="textarea-fullscreen" id="viewPromptContent" readonly></textarea>
+                        </div>
+                    </div>
+                    
+                    <!-- 右侧操作区域 -->
+                    <div class="form-right-sidebar">
+                        <div class="sidebar-section">
+                            <label class="form-label">⚡ 快速操作</label>
+                            <div style="display: flex; flex-direction: column; gap: 8px;">
+                                <button class="btn btn-success" onclick="copyPromptFromView()" style="width: 100%;">📋 复制内容</button>
+                                <button class="btn btn-primary" onclick="editPromptFromView()" style="width: 100%;">✏️ 编辑</button>
+                                <button class="btn btn-warning" onclick="exportSinglePrompt()" style="width: 100%;">📤 导出</button>
+                            </div>
+                        </div>
                         
                         <div class="sidebar-section">
-                            <label class="form-label">操作历史</label>
+                            <label class="form-label">🕒 操作历史</label>
                             <div style="font-size: 12px; color: var(--text-secondary); padding: 12px; background: var(--surface-color); border-radius: var(--radius-md); border: 1px solid var(--border-light);">
                                 <div>上次使用：<span id="lastUsedTime">从未使用</span></div>
                                 <div style="margin-top: 8px;">最近修改：<span id="lastModified">未修改</span></div>
+                                <div style="margin-top: 8px;">总使用时长：<span id="totalUsageTime">0分钟</span></div>
                             </div>
+                        </div>
+                        
+                        <div class="sidebar-section">
+                            <label class="form-label">🔗 相关操作</label>
+                            <div style="display: flex; flex-direction: column; gap: 8px;">
+                                <button class="btn btn-sm btn-secondary" onclick="findSimilarPrompts()" style="width: 100%;">🔍 查找相似</button>
+                                <button class="btn btn-sm btn-secondary" onclick="duplicatePrompt()" style="width: 100%;">📄 复制创建</button>
+                                <button class="btn btn-sm btn-secondary" onclick="sharePrompt()" style="width: 100%;">🔗 分享</button>
+                            </div>
+                        </div>
+                        
+                        <div class="form-actions-fullscreen">
+                            <button class="btn btn-secondary" onclick="closeModal('viewPromptModal')">❌ 关闭</button>
                         </div>
                     </div>
                 </div>
