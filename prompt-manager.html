@@ -3528,6 +3528,144 @@
             }
         }
         
+        /* 查看提示词模态框样式 */
+        .modal-large .modal-content {
+            width: 90%;
+            max-width: 800px;
+            max-height: 90vh;
+        }
+        
+        .view-prompt-meta {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 12px;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: var(--background-color);
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-light);
+        }
+        
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .meta-label {
+            font-weight: 500;
+            color: var(--text-secondary);
+            min-width: 70px;
+        }
+        
+        .view-prompt-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+        
+        @media (max-width: 600px) {
+            .view-prompt-actions {
+                justify-content: stretch;
+            }
+            
+            .view-prompt-actions .btn {
+                flex: 1;
+            }
+        }
+        
+        /* 优化后的添加提示词模态框样式 */
+        .modal-optimized .modal-content {
+            width: 90%;
+            max-width: 900px;
+            max-height: 90vh;
+        }
+        
+        .prompt-form {
+            display: grid;
+            grid-template-rows: 1fr auto auto;
+            gap: 20px;
+            height: 100%;
+            min-height: 500px;
+        }
+        
+        .form-content-main {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            flex: 1;
+        }
+        
+        .content-group {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .content-group .textarea-large {
+            flex: 1;
+            min-height: 300px;
+            resize: vertical;
+        }
+        
+        .form-metadata {
+            background: var(--background-color);
+            padding: 15px;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-light);
+        }
+        
+        .metadata-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-bottom: 12px;
+        }
+        
+        .form-control-sm {
+            font-size: var(--font-size-sm);
+            padding: 6px 8px;
+        }
+        
+        .form-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+            flex-wrap: wrap;
+        }
+        
+        @media (max-width: 768px) {
+            .metadata-grid {
+                grid-template-columns: 1fr;
+                gap: 12px;
+            }
+            
+            .form-actions {
+                justify-content: stretch;
+            }
+            
+            .form-actions .btn {
+                flex: 1;
+            }
+        }
+        
+        @media (max-width: 600px) {
+            .modal-optimized .modal-content {
+                width: 95%;
+                max-height: 95vh;
+            }
+            
+            .prompt-form {
+                min-height: 400px;
+            }
+            
+            .content-group .textarea-large {
+                min-height: 200px;
+            }
+        }
+        
         /* 横屏模式优化 */
         @media (max-width: 768px) and (orientation: landscape) {
             .modal-content {
@@ -3724,6 +3862,9 @@
                     <option value="name">按名称</option>
                     <option value="date">按时间</option>
                 </select>
+                <button class="btn btn-sm btn-outline-secondary" id="resetPromptSort" onclick="resetSort('prompts')" title="重置为自动排序" style="display: none;">
+                    🔄
+                </button>
             </div>
 
             <div id="promptsContainer" class="items-grid">
@@ -4330,38 +4471,48 @@ Stack Overflow - https://stackoverflow.com - 程序员问答社区\n解决编程
 
     <!-- 添加提示词模态框 -->
     <div id="addPromptModal" class="modal">
-        <div class="modal-content">
+        <div class="modal-content modal-optimized">
             <div class="modal-header">
                 <div class="modal-title">添加提示词</div>
                 <button class="close-btn" onclick="closeModal('addPromptModal')">&times;</button>
             </div>
-            <form onsubmit="savePrompt(event)">
-                <div class="form-group">
-                    <label class="form-label">标题</label>
-                    <input type="text" class="form-control" id="promptTitle" required>
-                </div>
-                <div class="form-group">
-                    <label class="form-label">内容</label>
-                    <textarea class="textarea" id="promptContent" required placeholder="输入提示词内容..."></textarea>
-                </div>
-                <div class="form-group">
-                    <label class="form-label">分类</label>
-                    <input type="text" class="form-control" id="promptCategoryInput" list="promptCategories" placeholder="输入或选择分类（支持多级：工作/开发/AI）">
-                    <datalist id="promptCategories"></datalist>
-                    <small style="color: #666; font-size: 12px;">💡 使用"/"分隔多级分类，如：工作/开发/前端</small>
-                </div>
-                <div class="form-group">
-                    <label class="form-label">标签（用逗号分隔）</label>
-                    <input type="text" class="form-control" id="promptTags" placeholder="例如：工作,效率,AI">
-                    <div class="tags-suggestions" id="promptTagsSuggestions"></div>
-                </div>
-                <div class="form-group">
-                    <div class="checkbox-item">
-                        <input type="checkbox" id="promptPinned">
-                        <label for="promptPinned">置顶此提示词</label>
+            <form onsubmit="savePrompt(event)" class="prompt-form">
+                <!-- 主要内容区 -->
+                <div class="form-content-main">
+                    <div class="form-group">
+                        <label class="form-label">标题</label>
+                        <input type="text" class="form-control" id="promptTitle" required>
+                    </div>
+                    <div class="form-group content-group">
+                        <label class="form-label">提示词内容</label>
+                        <textarea class="textarea textarea-large" id="promptContent" required placeholder="输入提示词内容..." rows="12"></textarea>
                     </div>
                 </div>
-                <div style="text-align: right;">
+                
+                <!-- 次要信息区 -->
+                <div class="form-metadata">
+                    <div class="metadata-grid">
+                        <div class="form-group">
+                            <label class="form-label">分类</label>
+                            <input type="text" class="form-control form-control-sm" id="promptCategoryInput" list="promptCategories" placeholder="工作/开发/AI">
+                            <datalist id="promptCategories"></datalist>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">标签</label>
+                            <input type="text" class="form-control form-control-sm" id="promptTags" placeholder="工作,效率,AI">
+                            <div class="tags-suggestions" id="promptTagsSuggestions"></div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="promptPinned">
+                            <label for="promptPinned">置顶此提示词</label>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 操作按钮 -->
+                <div class="form-actions">
                     <button type="button" class="btn btn-warning" onclick="clearPromptForm()">🗑️ 清除</button>
                     <button type="button" class="btn btn-secondary" onclick="closeModal('addPromptModal')">取消</button>
                     <button type="submit" class="btn btn-primary">保存</button>
@@ -4460,6 +4611,47 @@ Stack Overflow - https://stackoverflow.com - 程序员问答社区\n解决编程
         </div>
     </div>
 
+    <!-- 查看提示词模态框 -->
+    <div id="viewPromptModal" class="modal">
+        <div class="modal-content modal-large">
+            <div class="modal-header">
+                <div class="modal-title" id="viewPromptTitle">查看提示词</div>
+                <button class="close-btn" onclick="closeModal('viewPromptModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="view-prompt-meta">
+                    <div class="meta-item">
+                        <span class="meta-label">分类:</span>
+                        <span id="viewPromptCategory"></span>
+                    </div>
+                    <div class="meta-item">
+                        <span class="meta-label">标签:</span>
+                        <span id="viewPromptTags"></span>
+                    </div>
+                    <div class="meta-item">
+                        <span class="meta-label">使用次数:</span>
+                        <span id="viewPromptUsage"></span>
+                    </div>
+                    <div class="meta-item">
+                        <span class="meta-label">创建时间:</span>
+                        <span id="viewPromptDate"></span>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">提示词内容</label>
+                    <textarea class="form-control" id="viewPromptContent" readonly rows="12"></textarea>
+                </div>
+                
+                <div class="view-prompt-actions">
+                    <button class="btn btn-success" onclick="copyPromptFromView()">📋 复制内容</button>
+                    <button class="btn btn-primary" onclick="editPromptFromView()">✏️ 编辑</button>
+                    <button class="btn btn-secondary" onclick="closeModal('viewPromptModal')">关闭</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Toast 通知 -->
     <div id="toast" class="toast"></div>
 
@@ -4500,6 +4692,13 @@ Stack Overflow - https://stackoverflow.com - 程序员问答社区\n解决编程
             draggedElement: null,
             draggedId: null,
             draggedType: null
+        };
+
+        // 排序状态
+        let sortState = {
+            prompts: 'auto', // 'auto' 或 'manual'
+            websites: 'auto',
+            filters: 'auto'
         };
 
         // 新的过滤器状态管理
@@ -5127,21 +5326,30 @@ Stack Overflow - https://stackoverflow.com - 程序员问答社区\n解决编程
 
             // 应用排序
             const sortElement = document.getElementById('promptSort');
-            const sortBy = sortElement ? sortElement.value : 'usage';
-            filteredPrompts.sort((a, b) => {
-                if (a.pinned !== b.pinned) return b.pinned - a.pinned;
-                
-                switch (sortBy) {
-                    case 'usage':
-                        return b.usageCount - a.usageCount;
-                    case 'name':
-                        return a.title.localeCompare(b.title);
-                    case 'date':
-                        return new Date(b.createdAt) - new Date(a.createdAt);
-                    default:
-                        return 0;
-                }
-            });
+            // 只在自动排序模式下进行排序
+            if (sortState.prompts === 'auto') {
+                const sortBy = sortElement ? sortElement.value : 'usage';
+                filteredPrompts.sort((a, b) => {
+                    if (a.pinned !== b.pinned) return b.pinned - a.pinned;
+                    
+                    switch (sortBy) {
+                        case 'usage':
+                            return b.usageCount - a.usageCount;
+                        case 'name':
+                            return a.title.localeCompare(b.title);
+                        case 'date':
+                            return new Date(b.createdAt) - new Date(a.createdAt);
+                        default:
+                            return 0;
+                    }
+                });
+            } else {
+                // 手动排序模式：保持原有顺序，但置顶项目仍然优先
+                filteredPrompts.sort((a, b) => {
+                    if (a.pinned !== b.pinned) return b.pinned - a.pinned;
+                    return 0;
+                });
+            }
 
             container.innerHTML = filteredPrompts.map((prompt, index) => `
                 <div class="item-card ${prompt.pinned ? 'pinned' : ''} ${batchMode.prompts && selectedItems.prompts.has(prompt.id) ? 'selected' : ''}" 
@@ -5149,17 +5357,18 @@ Stack Overflow - https://stackoverflow.com - 程序员问答社区\n解决编程
                      data-id="${prompt.id}" 
                      data-type="prompts"
                      data-index="${index}"
-                     onclick="${batchMode.prompts ? `toggleSelection('prompts', '${prompt.id}', event)` : `copyPrompt('${prompt.id}')`}">
+                     onclick="${batchMode.prompts ? `toggleSelection('prompts', '${prompt.id}', event)` : `viewPrompt('${prompt.id}')`}">
                     ${batchMode.prompts ? `<input type="checkbox" class="batch-checkbox" ${selectedItems.prompts.has(prompt.id) ? 'checked' : ''} onclick="event.stopPropagation(); toggleSelection('prompts', '${prompt.id}', event)">` : ''}
                     ${!batchMode.prompts ? '<div class="drag-handle">⋮⋮</div>' : ''}
                     <div class="item-header">
                         <div class="item-title">${escapeHtml(prompt.title)}</div>
                         <div class="item-actions">
-                            <button class="btn btn-primary" onclick="event.stopPropagation(); editPrompt('${prompt.id}')" title="编辑">✏️</button>
-                            <button class="btn btn-danger" onclick="event.stopPropagation(); deletePrompt('${prompt.id}')" title="删除">🗑️</button>
-                            <button class="btn btn-secondary" onclick="event.stopPropagation(); togglePin('prompts', '${prompt.id}')" title="${prompt.pinned ? '取消置顶' : '置顶'}">
+                            <button class="btn btn-success btn-sm" onclick="event.stopPropagation(); copyPrompt('${prompt.id}')" title="复制">📋</button>
+                            <button class="btn btn-primary btn-sm" onclick="event.stopPropagation(); editPrompt('${prompt.id}')" title="编辑">✏️</button>
+                            <button class="btn btn-secondary btn-sm" onclick="event.stopPropagation(); togglePin('prompts', '${prompt.id}')" title="${prompt.pinned ? '取消置顶' : '置顶'}">
                                 ${prompt.pinned ? '📌' : '📍'}
                             </button>
+                            <button class="btn btn-danger btn-sm" onclick="event.stopPropagation(); deletePrompt('${prompt.id}')" title="删除">🗑️</button>
                         </div>
                     </div>
                     <div class="item-content">${escapeHtml(prompt.content.substring(0, 100))}${prompt.content.length > 100 ? '...' : ''}</div>
@@ -11867,6 +12076,9 @@ MDN文档,https://developer.mozilla.org,Web开发文档,开发工具,"文档,前
             const draggedItem = items.splice(draggedIndex, 1)[0];
             items.splice(targetIndex, 0, draggedItem);
             
+            // 切换到手动排序模式
+            sortState[type] = 'manual';
+            
             saveData();
             
             // 重新渲染
@@ -11874,7 +12086,73 @@ MDN文档,https://developer.mozilla.org,Web开发文档,开发工具,"文档,前
             else if (type === 'websites') renderWebsites();
             else if (type === 'filters') renderFilters();
             
-            showToast('排序已更新');
+            showToast('排序已更新（手动模式）');
+            
+            // 显示重置排序按钮
+            updateSortResetButton(type);
+        }
+
+        function resetSort(type) {
+            sortState[type] = 'auto';
+            
+            // 重新渲染
+            if (type === 'prompts') renderPrompts();
+            else if (type === 'websites') renderWebsites();
+            else if (type === 'filters') renderFilters();
+            
+            showToast('已重置为自动排序');
+            
+            // 隐藏重置按钮
+            updateSortResetButton(type);
+        }
+
+        function updateSortResetButton(type) {
+            const resetBtn = document.getElementById(`reset${type.charAt(0).toUpperCase() + type.slice(1, -1)}Sort`);
+            if (resetBtn) {
+                resetBtn.style.display = sortState[type] === 'manual' ? 'inline-block' : 'none';
+            }
+        }
+
+        // ==================== 提示词查看功能 ====================
+        
+        function viewPrompt(id) {
+            const prompt = appData.prompts.find(p => p.id === id);
+            if (!prompt) return;
+            
+            // 填充查看模态框的内容
+            document.getElementById('viewPromptTitle').textContent = prompt.title;
+            document.getElementById('viewPromptCategory').textContent = prompt.category || '默认';
+            document.getElementById('viewPromptTags').textContent = prompt.tags ? prompt.tags.join(', ') : '无';
+            document.getElementById('viewPromptUsage').textContent = prompt.usageCount || 0;
+            document.getElementById('viewPromptDate').textContent = new Date(prompt.createdAt).toLocaleString();
+            document.getElementById('viewPromptContent').value = prompt.content;
+            
+            // 设置当前查看的提示词ID（用于编辑功能）
+            document.getElementById('viewPromptModal').dataset.promptId = id;
+            
+            openModal('viewPromptModal');
+        }
+        
+        function copyPromptFromView() {
+            const content = document.getElementById('viewPromptContent').value;
+            copyToClipboard(content);
+            
+            // 增加使用次数
+            const promptId = document.getElementById('viewPromptModal').dataset.promptId;
+            const prompt = appData.prompts.find(p => p.id === promptId);
+            if (prompt) {
+                prompt.usageCount = (prompt.usageCount || 0) + 1;
+                saveData();
+                
+                // 更新显示的使用次数
+                document.getElementById('viewPromptUsage').textContent = prompt.usageCount;
+            }
+        }
+        
+        function editPromptFromView() {
+            const promptId = document.getElementById('viewPromptModal').dataset.promptId;
+            closeModal('viewPromptModal');
+            editPrompt(promptId);
         }
 
         // ==================== 云端同步和认证功能 ====================
@@ -12252,15 +12530,14 @@ MDN文档,https://developer.mozilla.org,Web开发文档,开发工具,"文档,前
                         transform: translateY(-1px);
                     }
                     .header {
-                        display: flex;
-                        justify-content: space-between;
+                        display: grid;
+                        grid-template-columns: 1fr auto;
                         align-items: center;
-                        flex-wrap: wrap;
-                        gap: 12px;
+                        gap: 20px;
                         min-height: 60px;
+                        padding: 12px 0;
                     }
                     .header > div:first-child {
-                        flex: 1;
                         min-width: 0;
                     }
                     .header-controls {
@@ -12269,20 +12546,30 @@ MDN文档,https://developer.mozilla.org,Web开发文档,开发工具,"文档,前
                         gap: 12px;
                         flex-shrink: 0;
                     }
-                    .theme-toggle {
-                        order: 2;
-                    }
                     .sync-buttons {
-                        order: 1;
+                        display: flex;
+                        gap: 8px;
+                        align-items: center;
                     }
-                    @media (max-width: 768px) {
+                    @media (max-width: 1024px) {
                         .header {
-                            flex-direction: column;
-                            align-items: stretch;
-                            gap: 12px;
+                            grid-template-columns: 1fr;
+                            text-align: center;
+                            gap: 16px;
                         }
                         .header-controls {
                             justify-content: center;
+                        }
+                    }
+                    @media (max-width: 480px) {
+                        .sync-buttons {
+                            gap: 6px;
+                        }
+                        .sync-btn {
+                            min-width: 36px;
+                            height: 36px;
+                            padding: 6px 10px;
+                            font-size: 14px;
                         }
                     }
                 `;
