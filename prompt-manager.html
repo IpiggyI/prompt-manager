@@ -4983,6 +4983,13 @@ Stack Overflow - https://stackoverflow.com - 程序员问答社区\n解决编程
                             </div>
                         </div>
                         
+                        <div class="sidebar-section">
+                            <label class="form-label">📝 备注</label>
+                            <textarea id="promptNotesRight" 
+                                      placeholder="记录与提示词相关的备注信息..." 
+                                      style="width: 100%; min-height: 80px; padding: 8px; font-size: 12px; color: var(--text-primary); background: var(--input-bg); border: 1px solid var(--border-light); border-radius: var(--radius-md); resize: vertical; font-family: var(--font-mono);"></textarea>
+                        </div>
+                        
                         <div class="form-actions-fullscreen">
                             <button type="button" class="btn btn-warning" onclick="clearPromptForm()">🗑️ 清除</button>
                             <button type="button" class="btn btn-secondary" onclick="closeModal('addPromptModal')">❌ 取消</button>
@@ -5125,6 +5132,14 @@ Stack Overflow - https://stackoverflow.com - 程序员问答社区\n解决编程
                                 <div style="margin-top: 8px;"><strong>行数：</strong><span id="viewLineCount">0</span></div>
                                 <div style="margin-top: 8px;"><strong>段落：</strong><span id="viewParagraphCount">0</span></div>
                             </div>
+                        </div>
+                        
+                        <div class="sidebar-section">
+                            <label class="form-label">📝 备注</label>
+                            <textarea id="viewPromptNotes" 
+                                      placeholder="在此记录与提示词相关的备注信息..." 
+                                      style="width: 100%; min-height: 80px; padding: 12px; font-size: 12px; color: var(--text-primary); background: var(--surface-color); border: 1px solid var(--border-light); border-radius: var(--radius-md); resize: vertical; font-family: var(--font-mono);"
+                                      onchange="savePromptNotes()"></textarea>
                         </div>
                     </div>
                     
@@ -5764,6 +5779,7 @@ Stack Overflow - https://stackoverflow.com - 程序员问答社区\n解决编程
             const tagsInput = document.getElementById('promptTags').value.trim();
             const tags = tagsInput ? tagsInput.split(',').map(tag => tag.trim()).filter(tag => tag) : [];
             const pinned = document.getElementById('promptPinned').checked;
+            const notes = document.getElementById('promptNotesRight').value.trim();
 
             if (!title || !content) {
                 showToast('请填写完整信息', 'error');
@@ -5779,6 +5795,7 @@ Stack Overflow - https://stackoverflow.com - 程序员问答社区\n解决编程
                     prompt.category = category;
                     prompt.tags = tags;
                     prompt.pinned = pinned;
+                    prompt.notes = notes;
                     prompt.lastModified = new Date().toISOString();
                     prompt.updatedAt = new Date().toISOString(); // 保持兼容性
                 }
@@ -5792,6 +5809,7 @@ Stack Overflow - https://stackoverflow.com - 程序员问答社区\n解决编程
                     category,
                     tags,
                     pinned,
+                    notes,
                     usageCount: 0,
                     createdAt: new Date().toISOString(),
                     lastModified: new Date().toISOString(),
@@ -6011,6 +6029,7 @@ Stack Overflow - https://stackoverflow.com - 程序员问答社区\n解决编程
                 document.getElementById('promptCategoryInput').value = prompt.category;
                 document.getElementById('promptTags').value = (prompt.tags || []).join(', ');
                 document.getElementById('promptPinned').checked = prompt.pinned;
+                document.getElementById('promptNotesRight').value = prompt.notes || '';
                 
                 // 更新模态框标题
                 const modal = document.getElementById('addPromptModal');
@@ -6089,6 +6108,7 @@ Stack Overflow - https://stackoverflow.com - 程序员问答社区\n解决编程
                 document.getElementById('promptCategoryInput').value = '';
                 document.getElementById('promptTags').value = '';
                 document.getElementById('promptPinned').checked = false;
+                document.getElementById('promptNotesRight').value = '';
                 
                 // 清除标签建议
                 const suggestionsElement = document.getElementById('promptTagsSuggestions');
@@ -12676,6 +12696,7 @@ MDN文档,https://developer.mozilla.org,Web开发文档,开发工具,"文档,前
             document.getElementById('viewPromptUsage').textContent = prompt.usageCount || 0;
             document.getElementById('viewPromptDate').textContent = new Date(prompt.createdAt).toLocaleString();
             document.getElementById('viewPromptContent').value = prompt.content;
+            document.getElementById('viewPromptNotes').value = prompt.notes || '';
             
             // 渲染Markdown内容
             const renderedView = document.getElementById('viewPromptRendered');
@@ -12720,6 +12741,22 @@ MDN文档,https://developer.mozilla.org,Web开发文档,开发工具,"文档,前
             document.getElementById('lastUsedTime').textContent = lastUsedTime;
             document.getElementById('lastModified').textContent = lastModified;
             document.getElementById('totalUsageTime').textContent = totalUsageTime + '分钟';
+        }
+        
+        // 保存提示词备注
+        function savePromptNotes() {
+            const promptId = document.getElementById('viewPromptModal').dataset.promptId;
+            const notes = document.getElementById('viewPromptNotes').value.trim();
+            
+            if (!promptId) return;
+            
+            const prompt = appData.prompts.find(p => p.id === promptId);
+            if (prompt) {
+                prompt.notes = notes;
+                prompt.lastModified = new Date().toISOString();
+                saveData();
+                showToast('备注已保存', 'success');
+            }
         }
         
         function copyPromptFromView() {
