@@ -2401,6 +2401,431 @@
             color: #adb5bd;
         }
 
+        /* Markdown编辑器样式 */
+        .markdown-editor {
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            background: var(--surface-color);
+            overflow: hidden;
+        }
+
+        .markdown-toolbar {
+            display: flex;
+            align-items: center;
+            padding: 8px 12px;
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border-light);
+            gap: 4px;
+            flex-wrap: wrap;
+        }
+
+        .markdown-btn {
+            padding: 6px 10px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-sm);
+            background: var(--surface-color);
+            color: var(--text-primary);
+            font-size: var(--font-size-sm);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-weight: 500;
+        }
+
+        .markdown-btn:hover {
+            background: var(--primary-light);
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+        }
+
+        .markdown-btn:active {
+            transform: translateY(1px);
+        }
+
+        .markdown-separator {
+            width: 1px;
+            height: 20px;
+            background: var(--border-color);
+            margin: 0 4px;
+        }
+
+        .markdown-editor-area {
+            position: relative;
+            min-height: 200px;
+        }
+
+        .markdown-textarea {
+            width: 100%;
+            min-height: 200px;
+            padding: 16px;
+            border: none;
+            border-radius: 0;
+            background: transparent;
+            color: var(--text-primary);
+            font-family: 'Cascadia Code', 'SF Mono', Monaco, 'Inconsolata', 'Roboto Mono', 'Source Code Pro', monospace;
+            font-size: 14px;
+            line-height: 1.6;
+            resize: vertical;
+            outline: none;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        .markdown-preview {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            padding: 16px;
+            background: var(--surface-color);
+            overflow-y: auto;
+            font-size: 14px;
+            line-height: 1.6;
+            color: var(--text-primary);
+        }
+
+        .markdown-preview h1 {
+            font-size: 2em;
+            margin: 0.67em 0;
+            font-weight: bold;
+            color: var(--text-primary);
+        }
+
+        .markdown-preview h2 {
+            font-size: 1.5em;
+            margin: 0.83em 0;
+            font-weight: bold;
+            color: var(--text-primary);
+        }
+
+        .markdown-preview h3 {
+            font-size: 1.17em;
+            margin: 1em 0;
+            font-weight: bold;
+            color: var(--text-primary);
+        }
+
+        .markdown-preview p {
+            margin: 1em 0;
+        }
+
+        .markdown-preview code {
+            background: var(--bg-secondary);
+            padding: 2px 6px;
+            border-radius: var(--radius-sm);
+            font-family: 'Cascadia Code', 'SF Mono', Monaco, monospace;
+            font-size: 0.9em;
+            color: var(--primary-color);
+        }
+
+        .markdown-preview pre {
+            background: var(--bg-secondary);
+            padding: 16px;
+            border-radius: var(--radius-md);
+            overflow-x: auto;
+            margin: 1em 0;
+            border: 1px solid var(--border-light);
+        }
+
+        .markdown-preview pre code {
+            background: none;
+            padding: 0;
+            font-size: 0.9em;
+            color: var(--text-primary);
+        }
+
+        .markdown-preview ul, .markdown-preview ol {
+            margin: 1em 0;
+            padding-left: 2em;
+        }
+
+        .markdown-preview li {
+            margin: 0.5em 0;
+        }
+
+        .markdown-preview a {
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+
+        .markdown-preview a:hover {
+            text-decoration: underline;
+        }
+
+        .markdown-preview strong {
+            font-weight: bold;
+        }
+
+        .markdown-preview em {
+            font-style: italic;
+        }
+
+        .markdown-preview del {
+            text-decoration: line-through;
+            color: var(--text-secondary);
+        }
+
+        .markdown-preview blockquote {
+            margin: 1em 0;
+            padding: 0 1em;
+            border-left: 4px solid var(--border-color);
+            color: var(--text-secondary);
+        }
+
+        /* 暗色主题的Markdown编辑器 */
+        body.dark-theme .markdown-editor {
+            border-color: #4a5568;
+        }
+
+        body.dark-theme .markdown-toolbar {
+            background: #2d3748;
+            border-color: #4a5568;
+        }
+
+        body.dark-theme .markdown-btn {
+            background: #4a5568;
+            border-color: #718096;
+            color: #e2e8f0;
+        }
+
+        body.dark-theme .markdown-btn:hover {
+            background: #5a67d8;
+            border-color: #667eea;
+            color: #e2e8f0;
+        }
+
+        body.dark-theme .markdown-separator {
+            background: #718096;
+        }
+
+        body.dark-theme .markdown-textarea {
+            color: #e2e8f0;
+        }
+
+        body.dark-theme .markdown-preview {
+            background: #2d3748;
+            color: #e2e8f0;
+        }
+
+        body.dark-theme .markdown-preview h1,
+        body.dark-theme .markdown-preview h2,
+        body.dark-theme .markdown-preview h3 {
+            color: #e2e8f0;
+        }
+
+        body.dark-theme .markdown-preview code {
+            background: #4a5568;
+            color: #81e6d9;
+        }
+
+        body.dark-theme .markdown-preview pre {
+            background: #1a202c;
+            border-color: #4a5568;
+        }
+
+        body.dark-theme .markdown-preview blockquote {
+            border-color: #4a5568;
+            color: #a0aec0;
+        }
+
+        /* 查看页面的Markdown渲染样式 */
+        .view-content-container {
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            background: var(--surface-color);
+            overflow: hidden;
+        }
+
+        .view-mode-toggle {
+            display: flex;
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border-light);
+            padding: 8px;
+            gap: 4px;
+        }
+
+        .view-mode-btn {
+            padding: 8px 16px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-sm);
+            background: var(--surface-color);
+            color: var(--text-secondary);
+            font-size: var(--font-size-sm);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .view-mode-btn.active {
+            background: var(--primary-color);
+            border-color: var(--primary-color);
+            color: white;
+        }
+
+        .view-mode-btn:hover:not(.active) {
+            background: var(--primary-light);
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+        }
+
+        .view-content-area {
+            position: relative;
+            min-height: 300px;
+        }
+
+        .markdown-rendered-view {
+            padding: 20px;
+            color: var(--text-primary);
+            line-height: 1.6;
+            font-size: 14px;
+            min-height: 280px;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+
+        .markdown-rendered-view h1 {
+            font-size: 2em;
+            margin: 0.67em 0;
+            font-weight: bold;
+            color: var(--text-primary);
+            border-bottom: 1px solid var(--border-light);
+            padding-bottom: 0.3em;
+        }
+
+        .markdown-rendered-view h2 {
+            font-size: 1.5em;
+            margin: 0.83em 0;
+            font-weight: bold;
+            color: var(--text-primary);
+            border-bottom: 1px solid var(--border-light);
+            padding-bottom: 0.2em;
+        }
+
+        .markdown-rendered-view h3 {
+            font-size: 1.17em;
+            margin: 1em 0;
+            font-weight: bold;
+            color: var(--text-primary);
+        }
+
+        .markdown-rendered-view p {
+            margin: 1em 0;
+        }
+
+        .markdown-rendered-view code {
+            background: var(--bg-secondary);
+            padding: 2px 6px;
+            border-radius: var(--radius-sm);
+            font-family: 'Cascadia Code', 'SF Mono', Monaco, monospace;
+            font-size: 0.9em;
+            color: var(--primary-color);
+        }
+
+        .markdown-rendered-view pre {
+            background: var(--bg-secondary);
+            padding: 16px;
+            border-radius: var(--radius-md);
+            overflow-x: auto;
+            margin: 1em 0;
+            border: 1px solid var(--border-light);
+        }
+
+        .markdown-rendered-view pre code {
+            background: none;
+            padding: 0;
+            font-size: 0.9em;
+            color: var(--text-primary);
+        }
+
+        .markdown-rendered-view ul, 
+        .markdown-rendered-view ol {
+            margin: 1em 0;
+            padding-left: 2em;
+        }
+
+        .markdown-rendered-view li {
+            margin: 0.5em 0;
+        }
+
+        .markdown-rendered-view a {
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+
+        .markdown-rendered-view a:hover {
+            text-decoration: underline;
+        }
+
+        .markdown-rendered-view strong {
+            font-weight: bold;
+        }
+
+        .markdown-rendered-view em {
+            font-style: italic;
+        }
+
+        .markdown-rendered-view del {
+            text-decoration: line-through;
+            color: var(--text-secondary);
+        }
+
+        .markdown-rendered-view blockquote {
+            margin: 1em 0;
+            padding: 0 1em;
+            border-left: 4px solid var(--primary-color);
+            color: var(--text-secondary);
+            background: var(--bg-secondary);
+            border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+        }
+
+        /* 暗色主题下的查看页面样式 */
+        body.dark-theme .view-content-container {
+            border-color: #4a5568;
+        }
+
+        body.dark-theme .view-mode-toggle {
+            background: #2d3748;
+            border-color: #4a5568;
+        }
+
+        body.dark-theme .view-mode-btn {
+            background: #4a5568;
+            border-color: #718096;
+            color: #a0aec0;
+        }
+
+        body.dark-theme .view-mode-btn:hover:not(.active) {
+            background: #5a67d8;
+            border-color: #667eea;
+            color: #e2e8f0;
+        }
+
+        body.dark-theme .markdown-rendered-view {
+            color: #e2e8f0;
+        }
+
+        body.dark-theme .markdown-rendered-view h1,
+        body.dark-theme .markdown-rendered-view h2,
+        body.dark-theme .markdown-rendered-view h3 {
+            color: #e2e8f0;
+            border-color: #4a5568;
+        }
+
+        body.dark-theme .markdown-rendered-view code {
+            background: #4a5568;
+            color: #81e6d9;
+        }
+
+        body.dark-theme .markdown-rendered-view pre {
+            background: #1a202c;
+            border-color: #4a5568;
+        }
+
+        body.dark-theme .markdown-rendered-view blockquote {
+            border-color: #667eea;
+            background: #2d3748;
+            color: #a0aec0;
+        }
+
         /* 导出对话框样式 */
         .export-dialog-overlay {
             position: fixed;
@@ -4828,7 +5253,16 @@ Stack Overflow - https://stackoverflow.com - 程序员问答社区\n解决编程
                     <div class="form-main-area">
                         <div class="content-group">
                             <label class="form-label">💬 提示词内容</label>
-                            <textarea class="textarea-fullscreen" id="viewPromptContent" readonly></textarea>
+                            <div class="view-content-container">
+                                <div class="view-mode-toggle">
+                                    <button type="button" class="view-mode-btn active" data-mode="rendered" onclick="toggleViewMode('rendered')">📖 渲染视图</button>
+                                    <button type="button" class="view-mode-btn" data-mode="raw" onclick="toggleViewMode('raw')">📄 源码视图</button>
+                                </div>
+                                <div class="view-content-area">
+                                    <div class="markdown-rendered-view" id="viewPromptRendered"></div>
+                                    <textarea class="textarea-fullscreen" id="viewPromptContent" readonly style="display: none;"></textarea>
+                                </div>
+                            </div>
                         </div>
                     </div>
                     
@@ -4874,6 +5308,182 @@ Stack Overflow - https://stackoverflow.com - 程序员问答社区\n解决编程
     <div id="toast" class="toast"></div>
 
     <script>
+        // 简单的Markdown解析器
+        function parseMarkdown(text) {
+            if (!text) return '';
+            
+            let html = text
+                // 处理代码块
+                .replace(/```(\w+)?\n([\s\S]*?)```/g, '<pre><code class="language-$1">$2</code></pre>')
+                // 处理行内代码
+                .replace(/`([^`]+)`/g, '<code>$1</code>')
+                // 处理粗体
+                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                .replace(/__(.*?)__/g, '<strong>$1</strong>')
+                // 处理斜体
+                .replace(/\*(.*?)\*/g, '<em>$1</em>')
+                .replace(/_(.*?)_/g, '<em>$1</em>')
+                // 处理删除线
+                .replace(/~~(.*?)~~/g, '<del>$1</del>')
+                // 处理标题
+                .replace(/^### (.*$)/gim, '<h3>$1</h3>')
+                .replace(/^## (.*$)/gim, '<h2>$1</h2>')
+                .replace(/^# (.*$)/gim, '<h1>$1</h1>')
+                // 处理链接
+                .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank">$1</a>')
+                // 处理无序列表
+                .replace(/^\s*[\-\*\+]\s+(.*$)/gim, '<li>$1</li>')
+                // 处理有序列表
+                .replace(/^\s*\d+\.\s+(.*$)/gim, '<li>$1</li>')
+                // 处理换行
+                .replace(/\n/g, '<br>');
+            
+            // 包装列表项
+            html = html.replace(/(<li>.*<\/li>)/gs, '<ul>$1</ul>');
+            
+            return html;
+        }
+
+        // Markdown编辑器组件
+        function createMarkdownEditor(container, initialValue = '', placeholder = '') {
+            const editorContainer = document.createElement('div');
+            editorContainer.className = 'markdown-editor';
+            
+            const toolbar = document.createElement('div');
+            toolbar.className = 'markdown-toolbar';
+            toolbar.innerHTML = `
+                <button type="button" class="markdown-btn" onclick="insertMarkdown('**', '**', '粗体文本')" title="粗体">B</button>
+                <button type="button" class="markdown-btn" onclick="insertMarkdown('*', '*', '斜体文本')" title="斜体">I</button>
+                <button type="button" class="markdown-btn" onclick="insertMarkdown('~~', '~~', '删除线文本')" title="删除线">S</button>
+                <button type="button" class="markdown-btn" onclick="insertMarkdown('`', '`', '代码')" title="行内代码">Code</button>
+                <button type="button" class="markdown-btn" onclick="insertMarkdown('\\n```\\n', '\\n```\\n', '代码块')" title="代码块">{ }</button>
+                <button type="button" class="markdown-btn" onclick="insertMarkdown('# ', '', '标题')" title="标题">H1</button>
+                <button type="button" class="markdown-btn" onclick="insertMarkdown('- ', '', '列表项')" title="列表">List</button>
+                <button type="button" class="markdown-btn" onclick="insertMarkdown('[', '](url)', '链接文本')" title="链接">Link</button>
+                <div class="markdown-separator"></div>
+                <button type="button" class="markdown-btn preview-btn" onclick="toggleMarkdownPreview()" title="预览">👁</button>
+            `;
+            
+            const editorArea = document.createElement('div');
+            editorArea.className = 'markdown-editor-area';
+            
+            const textarea = document.createElement('textarea');
+            textarea.className = container.querySelector('textarea').className + ' markdown-textarea';
+            textarea.id = container.querySelector('textarea').id;
+            textarea.value = initialValue;
+            textarea.placeholder = placeholder || container.querySelector('textarea').placeholder;
+            textarea.required = container.querySelector('textarea').required;
+            textarea.addEventListener('input', updateMarkdownPreview);
+            
+            const preview = document.createElement('div');
+            preview.className = 'markdown-preview';
+            preview.style.display = 'none';
+            
+            editorArea.appendChild(textarea);
+            editorArea.appendChild(preview);
+            
+            editorContainer.appendChild(toolbar);
+            editorContainer.appendChild(editorArea);
+            
+            // 替换原有的textarea
+            const originalTextarea = container.querySelector('textarea');
+            container.replaceChild(editorContainer, originalTextarea);
+            
+            return {
+                textarea: textarea,
+                preview: preview,
+                container: editorContainer
+            };
+        }
+
+        // 插入Markdown语法
+        function insertMarkdown(prefix, suffix, placeholder) {
+            const textarea = document.activeElement;
+            if (textarea.tagName !== 'TEXTAREA') return;
+            
+            const start = textarea.selectionStart;
+            const end = textarea.selectionEnd;
+            const selectedText = textarea.value.substring(start, end);
+            const replacement = selectedText || placeholder;
+            
+            const before = textarea.value.substring(0, start);
+            const after = textarea.value.substring(end);
+            
+            textarea.value = before + prefix + replacement + suffix + after;
+            textarea.focus();
+            
+            const newStart = start + prefix.length;
+            const newEnd = newStart + replacement.length;
+            textarea.setSelectionRange(newStart, newEnd);
+            
+            // 触发input事件以更新预览
+            textarea.dispatchEvent(new Event('input'));
+        }
+
+        // 切换Markdown预览
+        function toggleMarkdownPreview() {
+            const textarea = document.querySelector('.markdown-textarea:focus') || 
+                            document.querySelector('.markdown-textarea');
+            if (!textarea) return;
+            
+            const container = textarea.closest('.markdown-editor');
+            const preview = container.querySelector('.markdown-preview');
+            const btn = container.querySelector('.preview-btn');
+            
+            if (preview.style.display === 'none') {
+                preview.style.display = 'block';
+                textarea.style.display = 'none';
+                btn.textContent = '✏️';
+                btn.title = '编辑';
+                updateMarkdownPreview({ target: textarea });
+            } else {
+                preview.style.display = 'none';
+                textarea.style.display = 'block';
+                btn.textContent = '👁';
+                btn.title = '预览';
+                textarea.focus();
+            }
+        }
+
+        // 更新Markdown预览
+        function updateMarkdownPreview(event) {
+            const textarea = event.target;
+            const container = textarea.closest('.markdown-editor');
+            if (!container) return;
+            
+            const preview = container.querySelector('.markdown-preview');
+            if (preview) {
+                preview.innerHTML = parseMarkdown(textarea.value);
+            }
+        }
+
+        // 初始化Markdown编辑器
+        function initMarkdownEditors() {
+            // 初始化添加提示词的编辑器
+            const addPromptContainer = document.querySelector('#promptContent');
+            if (addPromptContainer && addPromptContainer.closest('.content-group')) {
+                createMarkdownEditor(addPromptContainer.closest('.content-group'));
+            }
+        }
+
+        // 切换查看模式（渲染视图/源码视图）
+        function toggleViewMode(mode) {
+            const renderedView = document.getElementById('viewPromptRendered');
+            const rawView = document.getElementById('viewPromptContent');
+            const buttons = document.querySelectorAll('.view-mode-btn');
+            
+            buttons.forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.mode === mode);
+            });
+            
+            if (mode === 'rendered') {
+                renderedView.style.display = 'block';
+                rawView.style.display = 'none';
+            } else {
+                renderedView.style.display = 'none';
+                rawView.style.display = 'block';
+            }
+        }
         // 全局数据存储
         let appData = {
             prompts: [],
@@ -4952,6 +5562,8 @@ Stack Overflow - https://stackoverflow.com - 程序员问答社区\n解决编程
             initTestPanelState();
             // 初始化面板状态
             initFilterPanelStates();
+            // 初始化Markdown编辑器
+            initMarkdownEditors();
             // 初始化测试面板同步滚动
             initTestPanelSyncScroll();
             // 初始化云端同步功能
@@ -5629,7 +6241,21 @@ Stack Overflow - https://stackoverflow.com - 程序员问答社区\n解决编程
             }
         }
         
-        function fallbackCopyTextToClipboard(text, prompt) {
+        // 通用的复制到剪贴板函数
+        function copyToClipboard(text, successMessage = '已复制到剪贴板') {
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                return navigator.clipboard.writeText(text).then(() => {
+                    showToast(successMessage, 'success');
+                    return true;
+                }).catch(() => {
+                    return fallbackCopyTextToClipboard(text, null, successMessage);
+                });
+            } else {
+                return fallbackCopyTextToClipboard(text, null, successMessage);
+            }
+        }
+
+        function fallbackCopyTextToClipboard(text, prompt, successMessage = '提示词已复制到剪贴板') {
             const textArea = document.createElement('textarea');
             textArea.value = text;
             textArea.style.position = 'fixed';
@@ -5640,14 +6266,18 @@ Stack Overflow - https://stackoverflow.com - 程序员问答社区\n解决编程
             textArea.select();
             try {
                 const successful = document.execCommand('copy');
-                if (successful && prompt) {
-                    prompt.usageCount++;
-                    prompt.lastUsed = new Date().toISOString();
-                    saveData();
-                    renderPrompts();
-                    showToast('提示词已复制到剪贴板');
+                if (successful) {
+                    if (prompt) {
+                        prompt.usageCount++;
+                        prompt.lastUsed = new Date().toISOString();
+                        saveData();
+                        renderPrompts();
+                    }
+                    showToast(successMessage, 'success');
+                    return true;
                 } else {
                     showToast('复制失败，请手动选择复制', 'error');
+                    return false;
                 }
             } catch (err) {
                 showToast('复制失败，请手动选择复制', 'error');
@@ -12346,7 +12976,18 @@ MDN文档,https://developer.mozilla.org,Web开发文档,开发工具,"文档,前
             document.getElementById('viewPromptTags').textContent = prompt.tags ? prompt.tags.join(', ') : '无';
             document.getElementById('viewPromptUsage').textContent = prompt.usageCount || 0;
             document.getElementById('viewPromptDate').textContent = new Date(prompt.createdAt).toLocaleString();
+            
+            // 设置源码视图内容
             document.getElementById('viewPromptContent').value = prompt.content;
+            
+            // 渲染Markdown内容
+            const renderedView = document.getElementById('viewPromptRendered');
+            if (renderedView) {
+                renderedView.innerHTML = parseMarkdown(prompt.content);
+            }
+            
+            // 默认显示渲染视图
+            toggleViewMode('rendered');
             
             // 更新统计信息
             updateViewStats(prompt.content);
@@ -12386,21 +13027,24 @@ MDN文档,https://developer.mozilla.org,Web开发文档,开发工具,"文档,前
         
         function copyPromptFromView() {
             const content = document.getElementById('viewPromptContent').value;
-            copyToClipboard(content);
-            
-            // 增加使用次数和更新使用历史
             const promptId = document.getElementById('viewPromptModal').dataset.promptId;
             const prompt = appData.prompts.find(p => p.id === promptId);
-            if (prompt) {
-                prompt.usageCount = (prompt.usageCount || 0) + 1;
-                prompt.lastUsed = new Date().toISOString();
-                prompt.totalUsageTime = (prompt.totalUsageTime || 0) + 1; // 假设每次使用1分钟
-                saveData();
-                
-                // 更新显示的使用次数和历史信息
-                document.getElementById('viewPromptUsage').textContent = prompt.usageCount;
-                updateOperationHistory(prompt);
-            }
+            
+            copyToClipboard(content, '提示词内容已复制到剪贴板').then(() => {
+                // 增加使用次数和更新使用历史
+                if (prompt) {
+                    prompt.usageCount = (prompt.usageCount || 0) + 1;
+                    prompt.lastUsed = new Date().toISOString();
+                    prompt.totalUsageTime = (prompt.totalUsageTime || 0) + 1; // 假设每次使用1分钟
+                    saveData();
+                    
+                    // 更新显示的使用次数和历史信息
+                    document.getElementById('viewPromptUsage').textContent = prompt.usageCount;
+                    updateOperationHistory(prompt);
+                }
+            }).catch(() => {
+                // 复制失败的处理已经在copyToClipboard函数中完成
+            });
         }
         
         function editPromptFromView() {
@@ -12557,8 +13201,7 @@ MDN文档,https://developer.mozilla.org,Web开发文档,开发工具,"文档,前
 
         // 降级分享方法：复制到剪贴板
         function fallbackShare(shareText) {
-            copyToClipboard(shareText);
-            showToast('分享内容已复制到剪贴板', 'success');
+            copyToClipboard(shareText, '分享内容已复制到剪贴板');
         }
 
         // ==================== 云端同步和认证功能 ====================
