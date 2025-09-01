@@ -5470,7 +5470,8 @@ Stack Overflow - https://stackoverflow.com - 程序员问答社区\n解决编程
                     prompt.category = category;
                     prompt.tags = tags;
                     prompt.pinned = pinned;
-                    prompt.updatedAt = new Date().toISOString();
+                    prompt.lastModified = new Date().toISOString();
+                    prompt.updatedAt = new Date().toISOString(); // 保持兼容性
                 }
                 showToast('提示词已更新');
             } else {
@@ -5484,8 +5485,10 @@ Stack Overflow - https://stackoverflow.com - 程序员问答社区\n解决编程
                     pinned,
                     usageCount: 0,
                     createdAt: new Date().toISOString(),
+                    lastModified: new Date().toISOString(),
                     updatedAt: new Date().toISOString(),
-                    lastUsed: null
+                    lastUsed: null,
+                    totalUsageTime: 0
                 };
                 appData.prompts.push(prompt);
                 showToast('提示词添加成功');
@@ -12345,25 +12348,58 @@ MDN文档,https://developer.mozilla.org,Web开发文档,开发工具,"文档,前
             document.getElementById('viewPromptDate').textContent = new Date(prompt.createdAt).toLocaleString();
             document.getElementById('viewPromptContent').value = prompt.content;
             
+            // 更新统计信息
+            updateViewStats(prompt.content);
+            
+            // 更新操作历史信息
+            updateOperationHistory(prompt);
+            
             // 设置当前查看的提示词ID（用于编辑功能）
             document.getElementById('viewPromptModal').dataset.promptId = id;
             
             openModal('viewPromptModal');
+        }
+
+        // 更新查看页面的统计信息
+        function updateViewStats(content) {
+            const charCount = content.length;
+            const wordCount = content.trim() === '' ? 0 : content.trim().split(/\s+/).length;
+            const lineCount = content.split('\n').length;
+            const paragraphCount = content.split(/\n\s*\n/).filter(p => p.trim().length > 0).length;
+            
+            document.getElementById('viewCharCount').textContent = charCount;
+            document.getElementById('viewWordCount').textContent = wordCount;
+            document.getElementById('viewLineCount').textContent = lineCount;
+            document.getElementById('viewParagraphCount').textContent = paragraphCount;
+        }
+
+        // 更新操作历史信息
+        function updateOperationHistory(prompt) {
+            const lastUsedTime = prompt.lastUsed ? new Date(prompt.lastUsed).toLocaleString() : '从未使用';
+            const lastModified = prompt.lastModified ? new Date(prompt.lastModified).toLocaleString() : '未修改';
+            const totalUsageTime = prompt.totalUsageTime || 0;
+            
+            document.getElementById('lastUsedTime').textContent = lastUsedTime;
+            document.getElementById('lastModified').textContent = lastModified;
+            document.getElementById('totalUsageTime').textContent = totalUsageTime + '分钟';
         }
         
         function copyPromptFromView() {
             const content = document.getElementById('viewPromptContent').value;
             copyToClipboard(content);
             
-            // 增加使用次数
+            // 增加使用次数和更新使用历史
             const promptId = document.getElementById('viewPromptModal').dataset.promptId;
             const prompt = appData.prompts.find(p => p.id === promptId);
             if (prompt) {
                 prompt.usageCount = (prompt.usageCount || 0) + 1;
+                prompt.lastUsed = new Date().toISOString();
+                prompt.totalUsageTime = (prompt.totalUsageTime || 0) + 1; // 假设每次使用1分钟
                 saveData();
                 
-                // 更新显示的使用次数
+                // 更新显示的使用次数和历史信息
                 document.getElementById('viewPromptUsage').textContent = prompt.usageCount;
+                updateOperationHistory(prompt);
             }
         }
         
@@ -12371,6 +12407,158 @@ MDN文档,https://developer.mozilla.org,Web开发文档,开发工具,"文档,前
             const promptId = document.getElementById('viewPromptModal').dataset.promptId;
             closeModal('viewPromptModal');
             editPrompt(promptId);
+        }
+
+        // 导出单个提示词
+        function exportSinglePrompt() {
+            const promptId = document.getElementById('viewPromptModal').dataset.promptId;
+            const prompt = appData.prompts.find(p => p.id === promptId);
+            if (!prompt) {
+                showToast('未找到提示词数据', 'error');
+                return;
+            }
+
+            const exportData = [prompt];
+            const filename = `prompt_${prompt.title.replace(/[^\w\u4e00-\u9fa5]/g, '_')}_${new Date().getTime()}.json`;
+            
+            downloadJSON(exportData, filename);
+            showToast('提示词导出成功', 'success');
+        }
+
+        // 查找相似提示词
+        function findSimilarPrompts() {
+            const promptId = document.getElementById('viewPromptModal').dataset.promptId;
+            const currentPrompt = appData.prompts.find(p => p.id === promptId);
+            if (!currentPrompt) {
+                showToast('未找到当前提示词', 'error');
+                return;
+            }
+
+            const similarPrompts = appData.prompts.filter(p => {
+                if (p.id === promptId) return false;
+                
+                // 检查分类相同
+                if (p.category === currentPrompt.category && currentPrompt.category !== '默认') {
+                    return true;
+                }
+                
+                // 检查标签相似
+                if (currentPrompt.tags && p.tags) {
+                    const currentTags = currentPrompt.tags.map(t => t.toLowerCase());
+                    const promptTags = p.tags.map(t => t.toLowerCase());
+                    const commonTags = currentTags.filter(t => promptTags.includes(t));
+                    if (commonTags.length > 0) return true;
+                }
+                
+                // 检查标题包含相似关键词
+                const currentWords = currentPrompt.title.toLowerCase().split(/[\s,，、]+/);
+                const promptWords = p.title.toLowerCase().split(/[\s,，、]+/);
+                const commonWords = currentWords.filter(w => w.length > 1 && promptWords.includes(w));
+                if (commonWords.length > 0) return true;
+                
+                return false;
+            });
+
+            if (similarPrompts.length === 0) {
+                showToast('未找到相似的提示词', 'info');
+                return;
+            }
+
+            // 关闭当前查看窗口
+            closeModal('viewPromptModal');
+            
+            // 清空搜索框并显示相似结果
+            const searchInput = document.getElementById('promptSearch');
+            if (searchInput) {
+                // 使用第一个相似提示词的分类或标签进行搜索
+                const searchTerm = similarPrompts[0].category !== '默认' ? 
+                    similarPrompts[0].category : 
+                    (similarPrompts[0].tags && similarPrompts[0].tags.length > 0 ? similarPrompts[0].tags[0] : '');
+                
+                searchInput.value = searchTerm;
+                filterItems('prompts');
+            }
+            
+            showToast(`找到 ${similarPrompts.length} 个相似提示词`, 'success');
+        }
+
+        // 复制创建新提示词
+        function duplicatePrompt() {
+            const promptId = document.getElementById('viewPromptModal').dataset.promptId;
+            const originalPrompt = appData.prompts.find(p => p.id === promptId);
+            if (!originalPrompt) {
+                showToast('未找到原提示词', 'error');
+                return;
+            }
+
+            // 创建副本
+            const duplicatedPrompt = {
+                id: generateId(),
+                title: originalPrompt.title + ' (副本)',
+                content: originalPrompt.content,
+                category: originalPrompt.category,
+                tags: originalPrompt.tags ? [...originalPrompt.tags] : [],
+                createdAt: new Date().toISOString(),
+                lastModified: new Date().toISOString(),
+                usageCount: 0,
+                lastUsed: null,
+                totalUsageTime: 0,
+                pinned: false
+            };
+
+            appData.prompts.unshift(duplicatedPrompt);
+            saveData();
+            renderPrompts();
+            updateCategories();
+            
+            // 关闭当前查看窗口并打开编辑新提示词
+            closeModal('viewPromptModal');
+            editPrompt(duplicatedPrompt.id);
+            
+            showToast('提示词已复制创建', 'success');
+        }
+
+        // 分享提示词
+        function sharePrompt() {
+            const promptId = document.getElementById('viewPromptModal').dataset.promptId;
+            const prompt = appData.prompts.find(p => p.id === promptId);
+            if (!prompt) {
+                showToast('未找到提示词数据', 'error');
+                return;
+            }
+
+            const shareData = {
+                title: prompt.title,
+                content: prompt.content,
+                category: prompt.category,
+                tags: prompt.tags || [],
+                createdAt: prompt.createdAt
+            };
+
+            const shareText = `📝 ${shareData.title}\n\n🔖 分类: ${shareData.category}\n🏷️ 标签: ${shareData.tags.join(', ') || '无'}\n\n💬 内容:\n${shareData.content}\n\n⏰ 创建时间: ${new Date(shareData.createdAt).toLocaleString()}`;
+
+            // 尝试使用 Web Share API
+            if (navigator.share) {
+                navigator.share({
+                    title: `提示词: ${shareData.title}`,
+                    text: shareText,
+                }).then(() => {
+                    showToast('分享成功', 'success');
+                }).catch((error) => {
+                    console.error('分享失败:', error);
+                    // 降级到复制到剪贴板
+                    fallbackShare(shareText);
+                });
+            } else {
+                // 降级到复制到剪贴板
+                fallbackShare(shareText);
+            }
+        }
+
+        // 降级分享方法：复制到剪贴板
+        function fallbackShare(shareText) {
+            copyToClipboard(shareText);
+            showToast('分享内容已复制到剪贴板', 'success');
         }
 
         // ==================== 云端同步和认证功能 ====================
