@@ -2443,13 +2443,22 @@
         }
 
         .markdown-rendered {
-            padding: 16px;
+            flex: 1;
+            resize: none;
+            padding: 20px;
             background: var(--surface-color);
-            border: 1px solid var(--border-light);
+            border: 2px solid var(--border-color);
             border-radius: var(--radius-md);
             color: var(--text-primary);
             line-height: 1.6;
-            font-size: 14px;
+            font-size: 15px;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            overflow-y: auto;
+            min-height: 500px;
+            max-height: calc(100vh - 300px);
+            border-radius: 0 0 var(--radius-md) var(--radius-md);
+            box-sizing: border-box;
+            border-top: none;
         }
 
         .markdown-rendered h1 {
@@ -2606,6 +2615,38 @@
             background: #2d3748;
             border-color: #4a5568;
             color: #e2e8f0;
+        }
+
+        /* 自定义滚动条样式 */
+        .markdown-rendered::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .markdown-rendered::-webkit-scrollbar-track {
+            background: var(--bg-secondary);
+            border-radius: 4px;
+        }
+
+        .markdown-rendered::-webkit-scrollbar-thumb {
+            background: var(--border-color);
+            border-radius: 4px;
+        }
+
+        .markdown-rendered::-webkit-scrollbar-thumb:hover {
+            background: var(--primary-color);
+        }
+
+        /* 暗色主题滚动条 */
+        body.dark-theme .markdown-rendered::-webkit-scrollbar-track {
+            background: #1a202c;
+        }
+
+        body.dark-theme .markdown-rendered::-webkit-scrollbar-thumb {
+            background: #4a5568;
+        }
+
+        body.dark-theme .markdown-rendered::-webkit-scrollbar-thumb:hover {
+            background: #667eea;
         }
 
         body.dark-theme .markdown-rendered h1,
@@ -4010,6 +4051,12 @@
                 padding: 16px;
             }
             
+            .markdown-rendered {
+                min-height: 300px;
+                font-size: 14px;
+                padding: 16px;
+            }
+            
             .form-actions-fullscreen {
                 flex-direction: column;
             }
@@ -5089,7 +5136,7 @@ Stack Overflow - https://stackoverflow.com - 程序员问答社区\n解决编程
                                 <button type="button" class="view-mode-btn active" data-mode="rendered" onclick="toggleViewMode('rendered')">📖 渲染视图</button>
                                 <button type="button" class="view-mode-btn" data-mode="raw" onclick="toggleViewMode('raw')">📄 源码视图</button>
                             </div>
-                            <div id="viewPromptRendered" class="markdown-rendered" style="min-height: 300px;"></div>
+                            <div id="viewPromptRendered" class="markdown-rendered"></div>
                             <textarea class="textarea-fullscreen" id="viewPromptContent" readonly style="display: none;"></textarea>
                         </div>
                     </div>
