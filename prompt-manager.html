@@ -2445,14 +2445,14 @@
         .markdown-rendered {
             flex: 1;
             resize: none;
-            padding: 20px;
+            padding: 24px;
             background: var(--surface-color);
             border: 2px solid var(--border-color);
             border-radius: var(--radius-md);
             color: var(--text-primary);
-            line-height: 1.6;
+            line-height: 1.7;
             font-size: 15px;
-            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, 'Noto Sans', sans-serif;
             overflow-y: auto;
             min-height: 500px;
             max-height: calc(100vh - 300px);
@@ -2462,98 +2462,245 @@
         }
 
         .markdown-rendered h1 {
-            font-size: 2em;
-            margin: 0.67em 0;
-            font-weight: bold;
+            font-size: 2.2em;
+            margin: 1.5em 0 0.8em 0;
+            font-weight: 700;
             color: var(--text-primary);
-            border-bottom: 1px solid var(--border-light);
-            padding-bottom: 0.3em;
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 0.5em;
+            line-height: 1.2;
         }
 
         .markdown-rendered h2 {
-            font-size: 1.5em;
-            margin: 0.83em 0;
-            font-weight: bold;
+            font-size: 1.8em;
+            margin: 1.2em 0 0.6em 0;
+            font-weight: 600;
             color: var(--text-primary);
-            border-bottom: 1px solid var(--border-light);
-            padding-bottom: 0.2em;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 0.3em;
+            line-height: 1.3;
         }
 
         .markdown-rendered h3 {
-            font-size: 1.17em;
-            margin: 1em 0;
-            font-weight: bold;
+            font-size: 1.4em;
+            margin: 1em 0 0.4em 0;
+            font-weight: 600;
             color: var(--text-primary);
+            line-height: 1.3;
+        }
+
+        .markdown-rendered h4 {
+            font-size: 1.2em;
+            margin: 0.8em 0 0.3em 0;
+            font-weight: 600;
+            color: var(--text-primary);
+            line-height: 1.4;
+        }
+
+        .markdown-rendered h5 {
+            font-size: 1.1em;
+            margin: 0.6em 0 0.2em 0;
+            font-weight: 600;
+            color: var(--text-primary);
+            line-height: 1.4;
+        }
+
+        .markdown-rendered h6 {
+            font-size: 1em;
+            margin: 0.5em 0 0.2em 0;
+            font-weight: 600;
+            color: var(--text-secondary);
+            line-height: 1.4;
         }
 
         .markdown-rendered p {
-            margin: 1em 0;
+            margin: 1.2em 0;
+            line-height: 1.7;
         }
 
         .markdown-rendered code {
             background: var(--bg-secondary);
-            padding: 2px 6px;
+            padding: 3px 8px;
             border-radius: var(--radius-sm);
-            font-family: 'Cascadia Code', 'SF Mono', Monaco, monospace;
-            font-size: 0.9em;
+            font-family: 'Cascadia Code', 'JetBrains Mono', 'SF Mono', Monaco, monospace;
+            font-size: 0.88em;
             color: var(--primary-color);
+            border: 1px solid var(--border-light);
+            white-space: nowrap;
         }
 
         .markdown-rendered pre {
             background: var(--bg-secondary);
-            padding: 16px;
+            padding: 20px;
             border-radius: var(--radius-md);
             overflow-x: auto;
-            margin: 1em 0;
+            margin: 1.5em 0;
             border: 1px solid var(--border-light);
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
+            position: relative;
         }
 
         .markdown-rendered pre code {
             background: none;
             padding: 0;
-            font-size: 0.9em;
+            font-size: 0.85em;
             color: var(--text-primary);
+            border: none;
+            white-space: pre;
+            font-family: 'Cascadia Code', 'JetBrains Mono', 'SF Mono', Monaco, monospace;
+            line-height: 1.5;
         }
 
         .markdown-rendered ul, 
         .markdown-rendered ol {
-            margin: 1em 0;
-            padding-left: 2em;
+            margin: 1.2em 0;
+            padding-left: 1.8em;
+        }
+
+        .markdown-rendered ul {
+            list-style-type: disc;
+        }
+
+        .markdown-rendered ol {
+            list-style-type: decimal;
         }
 
         .markdown-rendered li {
-            margin: 0.5em 0;
+            margin: 0.6em 0;
+            line-height: 1.6;
+        }
+
+        .markdown-rendered li > p {
+            margin: 0.4em 0;
         }
 
         .markdown-rendered a {
             color: var(--primary-color);
             text-decoration: none;
+            border-bottom: 1px solid transparent;
+            transition: all 0.2s ease;
         }
 
         .markdown-rendered a:hover {
-            text-decoration: underline;
+            text-decoration: none;
+            border-bottom-color: var(--primary-color);
+            background: rgba(99, 102, 241, 0.1);
+            padding: 2px 4px;
+            margin: 0 -2px;
+            border-radius: 3px;
         }
 
         .markdown-rendered strong {
-            font-weight: bold;
+            font-weight: 600;
+            color: var(--text-primary);
         }
 
         .markdown-rendered em {
             font-style: italic;
+            color: var(--text-primary);
         }
 
         .markdown-rendered del {
             text-decoration: line-through;
             color: var(--text-secondary);
+            opacity: 0.8;
         }
 
         .markdown-rendered blockquote {
-            margin: 1em 0;
-            padding: 0 1em;
+            margin: 1.5em 0;
+            padding: 1em 1.2em;
             border-left: 4px solid var(--primary-color);
             color: var(--text-secondary);
             background: var(--bg-secondary);
             border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+            font-style: italic;
+            position: relative;
+        }
+
+        .markdown-rendered blockquote p {
+            margin: 0.5em 0;
+        }
+
+        .markdown-rendered blockquote:before {
+            content: '"';
+            font-size: 3em;
+            color: var(--primary-color);
+            position: absolute;
+            left: 0.2em;
+            top: -0.1em;
+            opacity: 0.3;
+        }
+
+        /* 表格样式 */
+        .markdown-rendered table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5em 0;
+            font-size: 0.9em;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            border-radius: var(--radius-sm);
+            overflow: hidden;
+        }
+
+        .markdown-rendered th,
+        .markdown-rendered td {
+            padding: 12px 16px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-light);
+        }
+
+        .markdown-rendered th {
+            background: var(--primary-color);
+            color: white;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.85em;
+            letter-spacing: 0.5px;
+        }
+
+        .markdown-rendered tr:nth-child(even) {
+            background: var(--bg-secondary);
+        }
+
+        .markdown-rendered tr:hover {
+            background: rgba(99, 102, 241, 0.1);
+        }
+
+        /* 水平分割线 */
+        .markdown-rendered hr {
+            margin: 2em 0;
+            border: none;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--border-color), transparent);
+            border-radius: 1px;
+        }
+
+        /* 增强的样式细节 */
+        .markdown-rendered :first-child {
+            margin-top: 0;
+        }
+
+        .markdown-rendered :last-child {
+            margin-bottom: 0;
+        }
+
+        /* 代码语言标签 */
+        .markdown-rendered pre[class*="language-"] {
+            position: relative;
+        }
+
+        .markdown-rendered pre[class*="language-"]:before {
+            content: attr(class);
+            position: absolute;
+            top: 8px;
+            right: 12px;
+            font-size: 11px;
+            color: var(--text-secondary);
+            background: var(--bg-primary);
+            padding: 2px 8px;
+            border-radius: 3px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
         /* 查看模式切换 */
@@ -4949,14 +5096,24 @@ Stack Overflow - https://stackoverflow.com - 程序员问答社区\n解决编程
                         <div class="content-group">
                             <label class="form-label">💬 提示词内容</label>
                             <div class="markdown-toolbar">
-                                <button type="button" class="markdown-btn" onclick="insertMarkdown('**', '**', '粗体文本')" title="粗体">B</button>
-                                <button type="button" class="markdown-btn" onclick="insertMarkdown('*', '*', '斜体文本')" title="斜体">I</button>
-                                <button type="button" class="markdown-btn" onclick="insertMarkdown('~~', '~~', '删除线文本')" title="删除线">S</button>
-                                <button type="button" class="markdown-btn" onclick="insertMarkdown('`', '`', '代码')" title="行内代码">Code</button>
+                                <button type="button" class="markdown-btn" onclick="insertMarkdown('**', '**', '粗体文本')" title="粗体">**B**</button>
+                                <button type="button" class="markdown-btn" onclick="insertMarkdown('*', '*', '斜体文本')" title="斜体"><em>I</em></button>
+                                <button type="button" class="markdown-btn" onclick="insertMarkdown('~~', '~~', '删除线文本')" title="删除线">~~S~~</button>
+                                <div class="markdown-separator"></div>
+                                <button type="button" class="markdown-btn" onclick="insertMarkdown('`', '`', '代码')" title="行内代码">&lt;/&gt;</button>
                                 <button type="button" class="markdown-btn" onclick="insertMarkdown('\n```\n', '\n```\n', '代码块')" title="代码块">{ }</button>
-                                <button type="button" class="markdown-btn" onclick="insertMarkdown('# ', '', '标题')" title="标题">H1</button>
-                                <button type="button" class="markdown-btn" onclick="insertMarkdown('- ', '', '列表项')" title="列表">List</button>
-                                <button type="button" class="markdown-btn" onclick="insertMarkdown('[', '](url)', '链接文本')" title="链接">Link</button>
+                                <div class="markdown-separator"></div>
+                                <button type="button" class="markdown-btn" onclick="insertMarkdown('# ', '', '一级标题')" title="一级标题">H1</button>
+                                <button type="button" class="markdown-btn" onclick="insertMarkdown('## ', '', '二级标题')" title="二级标题">H2</button>
+                                <button type="button" class="markdown-btn" onclick="insertMarkdown('### ', '', '三级标题')" title="三级标题">H3</button>
+                                <div class="markdown-separator"></div>
+                                <button type="button" class="markdown-btn" onclick="insertMarkdown('- ', '', '无序列表')" title="无序列表">• List</button>
+                                <button type="button" class="markdown-btn" onclick="insertMarkdown('1. ', '', '有序列表')" title="有序列表">1. List</button>
+                                <button type="button" class="markdown-btn" onclick="insertMarkdown('> ', '', '引用')" title="引用">" Quote</button>
+                                <div class="markdown-separator"></div>
+                                <button type="button" class="markdown-btn" onclick="insertMarkdown('[', '](url)', '链接文本')" title="链接">🔗 Link</button>
+                                <button type="button" class="markdown-btn" onclick="insertMarkdown('\n---\n', '', '')" title="分割线">---</button>
+                                <button type="button" class="markdown-btn" onclick="insertMarkdownTable()" title="表格">📊 Table</button>
                             </div>
                             <textarea class="textarea-fullscreen" id="promptContent" required placeholder="在此输入您的提示词内容...\n\n支持多行文本、代码片段和格式化内容。\n可以使用 Markdown 语法进行格式化。" style="border-radius: 0 0 var(--radius-md) var(--radius-md);"></textarea>
                         </div>
@@ -5566,23 +5723,12 @@ Stack Overflow - https://stackoverflow.com - 程序员问答社区\n解决编程
             // 只在非编辑模式下处理表单
             if (!editState.isEditing) {
                 if (modalId === 'addPromptModal') {
-                    // 尝试恢复草稿
-                    const draft = loadDraft('prompt');
-                    if (draft) {
-                        document.getElementById('promptTitle').value = draft.title || '';
-                        document.getElementById('promptContent').value = draft.content || '';
-                        document.getElementById('promptCategoryInput').value = draft.category || '';
-                        document.getElementById('promptTags').value = draft.tags || '';
-                        document.getElementById('promptPinned').checked = draft.pinned || false;
-                        showToast('已恢复上次编辑的草稿', 'info');
-                    } else {
-                        // 清空表单
-                        document.getElementById('promptTitle').value = '';
-                        document.getElementById('promptContent').value = '';
-                        document.getElementById('promptCategoryInput').value = '';
-                        document.getElementById('promptTags').value = '';
-                        document.getElementById('promptPinned').checked = false;
-                    }
+                    // 清空表单
+                    document.getElementById('promptTitle').value = '';
+                    document.getElementById('promptContent').value = '';
+                    document.getElementById('promptCategoryInput').value = '';
+                    document.getElementById('promptTags').value = '';
+                    document.getElementById('promptPinned').checked = false;
                     
                     // 更新标题
                     const modalTitle = modal.querySelector('.modal-title');
@@ -12940,38 +13086,126 @@ MDN文档,https://developer.mozilla.org,Web开发文档,开发工具,"文档,前
 
         // ==================== Markdown功能模块 ====================
         
-        // 简单的Markdown解析器
+        // 增强的Markdown解析器
         function parseMarkdown(text) {
             if (!text) return '';
             
-            let html = text
-                // 处理代码块
-                .replace(/```(\w+)?\n([\s\S]*?)```/g, '<pre><code class="language-$1">$2</code></pre>')
+            // 预处理：标准化换行符
+            text = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+            
+            let html = text;
+            
+            // 1. 首先处理代码块（避免被其他规则影响）
+            html = html.replace(/```(\w+)?\n([\s\S]*?)```/g, '<pre><code class="language-$1">$2</code></pre>');
+            
+            // 2. 处理引用块
+            html = html.replace(/^>\s*(.*$)/gim, '<blockquote><p>$1</p></blockquote>');
+            
+            // 3. 处理标题（从大到小，避免冲突）
+            html = html.replace(/^#### (.*$)/gim, '<h4>$1</h4>');
+            html = html.replace(/^### (.*$)/gim, '<h3>$1</h3>');
+            html = html.replace(/^## (.*$)/gim, '<h2>$1</h2>');
+            html = html.replace(/^# (.*$)/gim, '<h1>$1</h1>');
+            
+            // 4. 处理水平分割线
+            html = html.replace(/^---+$/gim, '<hr>');
+            html = html.replace(/^\*\*\*+$/gim, '<hr>');
+            
+            // 5. 处理表格
+            html = html.replace(/\|(.+)\|\n\|[-\s:]+\|\n((?:\|.+\|\n?)*)/g, function(match, header, rows) {
+                const headerCells = header.split('|').map(cell => `<th>${cell.trim()}</th>`).join('');
+                const bodyRows = rows.trim().split('\n').map(row => {
+                    const cells = row.split('|').slice(1, -1).map(cell => `<td>${cell.trim()}</td>`).join('');
+                    return `<tr>${cells}</tr>`;
+                }).join('');
+                return `<table><thead><tr>${headerCells}</tr></thead><tbody>${bodyRows}</tbody></table>`;
+            });
+            
+            // 6. 处理列表
+            const lines = html.split('\n');
+            const processedLines = [];
+            let inUnorderedList = false;
+            let inOrderedList = false;
+            
+            for (let i = 0; i < lines.length; i++) {
+                const line = lines[i];
+                const unorderedMatch = line.match(/^\s*[\-\*\+]\s+(.+)$/);
+                const orderedMatch = line.match(/^\s*\d+\.\s+(.+)$/);
+                
+                if (unorderedMatch) {
+                    if (!inUnorderedList) {
+                        processedLines.push('<ul>');
+                        inUnorderedList = true;
+                    }
+                    if (inOrderedList) {
+                        processedLines.push('</ol>');
+                        inOrderedList = false;
+                    }
+                    processedLines.push(`<li>${unorderedMatch[1]}</li>`);
+                } else if (orderedMatch) {
+                    if (!inOrderedList) {
+                        processedLines.push('<ol>');
+                        inOrderedList = true;
+                    }
+                    if (inUnorderedList) {
+                        processedLines.push('</ul>');
+                        inUnorderedList = false;
+                    }
+                    processedLines.push(`<li>${orderedMatch[1]}</li>`);
+                } else {
+                    if (inUnorderedList) {
+                        processedLines.push('</ul>');
+                        inUnorderedList = false;
+                    }
+                    if (inOrderedList) {
+                        processedLines.push('</ol>');
+                        inOrderedList = false;
+                    }
+                    processedLines.push(line);
+                }
+            }
+            
+            // 关闭未关闭的列表
+            if (inUnorderedList) processedLines.push('</ul>');
+            if (inOrderedList) processedLines.push('</ol>');
+            
+            html = processedLines.join('\n');
+            
+            // 7. 处理文本格式（粗体、斜体、删除线等）
+            html = html
                 // 处理行内代码
                 .replace(/`([^`]+)`/g, '<code>$1</code>')
-                // 处理粗体
-                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-                .replace(/__(.*?)__/g, '<strong>$1</strong>')
+                // 处理粗体（避免与斜体冲突）
+                .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+                .replace(/__([^_]+)__/g, '<strong>$1</strong>')
                 // 处理斜体
-                .replace(/\*(.*?)\*/g, '<em>$1</em>')
-                .replace(/_(.*?)_/g, '<em>$1</em>')
+                .replace(/\*([^*]+)\*/g, '<em>$1</em>')
+                .replace(/_([^_]+)_/g, '<em>$1</em>')
                 // 处理删除线
-                .replace(/~~(.*?)~~/g, '<del>$1</del>')
-                // 处理标题
-                .replace(/^### (.*$)/gim, '<h3>$1</h3>')
-                .replace(/^## (.*$)/gim, '<h2>$1</h2>')
-                .replace(/^# (.*$)/gim, '<h1>$1</h1>')
+                .replace(/~~([^~]+)~~/g, '<del>$1</del>')
                 // 处理链接
-                .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank">$1</a>')
-                // 处理无序列表
-                .replace(/^\s*[\-\*\+]\s+(.*$)/gim, '<li>$1</li>')
-                // 处理有序列表
-                .replace(/^\s*\d+\.\s+(.*$)/gim, '<li>$1</li>')
-                // 处理换行
-                .replace(/\n/g, '<br>');
+                .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>')
+                // 处理自动链接
+                .replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank" rel="noopener noreferrer">$1</a>');
             
-            // 包装列表项
-            html = html.replace(/(<li>.*<\/li>)/gs, '<ul>$1</ul>');
+            // 8. 处理段落
+            const paragraphs = html.split('\n\n').filter(p => p.trim());
+            html = paragraphs.map(p => {
+                const trimmed = p.trim();
+                // 如果已经是HTML标签，不需要包装p标签
+                if (trimmed.match(/^<(h[1-6]|ul|ol|blockquote|pre|table|hr)/)) {
+                    return trimmed;
+                }
+                // 如果是单独的HTML标签行，不包装
+                if (trimmed.match(/^<\/?(ul|ol|li|blockquote)>/)) {
+                    return trimmed;
+                }
+                // 普通文本包装为段落
+                if (trimmed && !trimmed.match(/^<\w+>/)) {
+                    return `<p>${trimmed.replace(/\n/g, '<br>')}</p>`;
+                }
+                return trimmed;
+            }).join('\n');
             
             return html;
         }
@@ -13017,6 +13251,34 @@ MDN文档,https://developer.mozilla.org,Web开发文档,开发工具,"文档,前
             
             const newStart = start + prefix.length;
             const newEnd = newStart + replacement.length;
+            textarea.setSelectionRange(newStart, newEnd);
+        }
+
+        // 插入Markdown表格
+        function insertMarkdownTable() {
+            const textarea = document.activeElement.tagName === 'TEXTAREA' ? 
+                            document.activeElement : 
+                            document.getElementById('promptContent');
+            
+            if (!textarea) return;
+            
+            const tableTemplate = `
+| 列1 | 列2 | 列3 |
+|-----|-----|-----|
+| 数据1 | 数据2 | 数据3 |
+| 数据4 | 数据5 | 数据6 |`;
+            
+            const start = textarea.selectionStart;
+            const end = textarea.selectionEnd;
+            const before = textarea.value.substring(0, start);
+            const after = textarea.value.substring(end);
+            
+            textarea.value = before + tableTemplate + after;
+            textarea.focus();
+            
+            // 选择第一个单元格内容
+            const newStart = start + tableTemplate.indexOf('列1');
+            const newEnd = newStart + 2;
             textarea.setSelectionRange(newStart, newEnd);
         }
 
