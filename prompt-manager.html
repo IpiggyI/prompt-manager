@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Prompt Flow -- 提示词管理1</title>
+    <title>Prompt Flow -- 提示词管理</title>
     <style>
         :root {
             /* 浅色主题 */
@@ -900,17 +900,20 @@
         function updateAuthUI() {
             const btnText = document.getElementById('authText');
             const btnIcon = document.getElementById('authIcon');
+            const authBtn = document.getElementById('authBtn');
             const fab = document.getElementById('addFab');
-            
+
             if (state.isLoggedIn) {
                 btnText.textContent = '退出';
                 btnIcon.textContent = '🚪';
-                document.getElementById('authBtn').classList.replace('btn-primary', 'btn-ghost');
+                authBtn.classList.remove('btn-primary');
+                authBtn.classList.add('btn-ghost');
                 fab.style.display = 'flex';
             } else {
                 btnText.textContent = '登录';
                 btnIcon.textContent = '🔑';
-                document.getElementById('authBtn').classList.replace('btn-ghost', 'btn-primary');
+                authBtn.classList.remove('btn-ghost');
+                authBtn.classList.add('btn-primary');
                 fab.style.display = 'none';
             }
         }
