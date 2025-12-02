@@ -1260,14 +1260,14 @@
             emptyState.style.display = 'none';
 
             grid.innerHTML = prompts.map(prompt => {
-                const isPrivate = prompt.isPrivate || false;
+                const isPrivate = prompt.isPrivate === true; // 明确判断是否为私密
                 const isPinned = prompt.isPinned || false;
                 const category = prompt.category || '未分类';
                 const tags = prompt.tags || [];
                 const usage = prompt.usage || 0;
                 const updatedAt = prompt.updatedAt ? new Date(prompt.updatedAt).toLocaleDateString() : '';
 
-                // 未登录时隐藏私密提示词
+                // 未登录时隐藏私密提示词(只隐藏isPrivate=true的)
                 if (isPrivate && !authState.isLoggedIn) {
                     return '';
                 }
@@ -1320,10 +1320,11 @@
                     prompt.content.toLowerCase().includes(searchTerm) ||
                     (prompt.category && prompt.category.toLowerCase().includes(searchTerm));
 
-                // 可见性过滤
+                // 可见性过滤 - 明确判断,未设置isPrivate的视为公开
+                const isPrivate = prompt.isPrivate === true;
                 const matchesVisibility = visibilityFilter === 'all' ||
-                    (visibilityFilter === 'public' && !prompt.isPrivate) ||
-                    (visibilityFilter === 'private' && prompt.isPrivate);
+                    (visibilityFilter === 'public' && !isPrivate) ||
+                    (visibilityFilter === 'private' && isPrivate);
 
                 // 分类过滤
                 const matchesCategory = categoryFilter === 'all' ||
@@ -1457,13 +1458,14 @@
             const createdAt = prompt.createdAt ? new Date(prompt.createdAt).toLocaleDateString() : '';
             const updatedAt = prompt.updatedAt ? new Date(prompt.updatedAt).toLocaleDateString() : '';
             const tags = prompt.tags || [];
+            const isPrivate = prompt.isPrivate === true; // 明确判断
 
             let metaHtml = `
                 <span class="view-meta-item">📁 ${escapeHtml(category)}</span>
                 <span class="view-meta-item">👁️ 使用 ${usage} 次</span>
                 ${createdAt ? `<span class="view-meta-item">📅 创建于 ${createdAt}</span>` : ''}
                 ${updatedAt ? `<span class="view-meta-item">🔄 更新于 ${updatedAt}</span>` : ''}
-                <span class="view-meta-item">${prompt.isPrivate ? '🔒 私密' : '🌐 公开'}</span>
+                <span class="view-meta-item">${isPrivate ? '🔒 私密' : '🌐 公开'}</span>
             `;
 
             if (tags.length > 0) {
