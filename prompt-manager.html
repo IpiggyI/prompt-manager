@@ -1322,9 +1322,16 @@
 
                 // 可见性过滤 - 明确判断,未设置isPrivate的视为公开
                 const isPrivate = prompt.isPrivate === true;
-                const matchesVisibility = visibilityFilter === 'all' ||
-                    (visibilityFilter === 'public' && !isPrivate) ||
-                    (visibilityFilter === 'private' && isPrivate);
+
+                // 如果用户选择了筛选条件,则应用筛选
+                // 如果是"全部",则不过滤(后续在renderPrompts中根据登录状态决定是否显示)
+                let matchesVisibility = true;
+                if (visibilityFilter === 'public') {
+                    matchesVisibility = !isPrivate;
+                } else if (visibilityFilter === 'private') {
+                    matchesVisibility = isPrivate;
+                }
+                // visibilityFilter === 'all' 时,matchesVisibility 保持为 true
 
                 // 分类过滤
                 const matchesCategory = categoryFilter === 'all' ||
