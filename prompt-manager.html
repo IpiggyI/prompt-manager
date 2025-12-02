@@ -958,7 +958,7 @@
                     <!-- 控制按钮组 -->
                     <div class="btn-group">
                         <button class="btn btn-secondary btn-sm" id="loginBtn" onclick="showLoginModal()">
-                            🔐 同步设置
+                            🔐 登录
                         </button>
                         <button class="btn btn-secondary btn-sm" id="syncBtn" onclick="syncToCloud()" style="display: none;">
                             ☁️ 同步
@@ -1096,31 +1096,23 @@
 
     <!-- 登录模态框 -->
     <div class="modal" id="loginModal">
-        <div class="modal-content" style="max-width: 450px;">
+        <div class="modal-content" style="max-width: 400px;">
             <div class="modal-header">
-                <h2 class="modal-title">配置云端同步</h2>
+                <h2 class="modal-title">登录</h2>
                 <button class="modal-close" onclick="closeModal('loginModal')">✕</button>
             </div>
             <div class="modal-body">
                 <form id="loginForm" onsubmit="handleLogin(event)">
                     <div class="form-group">
-                        <label class="form-label">GitHub Personal Access Token</label>
-                        <input type="password" class="form-control" id="loginPassword" required placeholder="ghp_xxxxxxxxxxxx">
-                        <span class="form-hint">
-                            需要具有 gist 权限的 Token。
-                            <a href="https://github.com/settings/tokens/new?scopes=gist&description=Prompt%20Manager%20Sync" target="_blank" style="color: var(--primary-color);">点此创建</a>
-                        </span>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Gist ID（可选，留空则自动创建）</label>
-                        <input type="text" class="form-control" id="gistId" placeholder="留空将自动创建新的 Gist">
-                        <span class="form-hint">如果已有同步的 Gist，请输入其 ID</span>
+                        <label class="form-label">密码</label>
+                        <input type="password" class="form-control" id="loginPassword" required>
+                        <span class="form-hint">输入云端同步密码</span>
                     </div>
                 </form>
             </div>
             <div class="modal-footer">
                 <button class="btn btn-secondary" onclick="closeModal('loginModal')">取消</button>
-                <button class="btn btn-primary" onclick="document.getElementById('loginForm').requestSubmit()">连接</button>
+                <button class="btn btn-primary" onclick="document.getElementById('loginForm').requestSubmit()">登录</button>
             </div>
         </div>
     </div>
@@ -1179,8 +1171,7 @@
 
         let authState = {
             isLoggedIn: false,
-            token: localStorage.getItem('githubToken') || null,
-            gistId: localStorage.getItem('gistId') || null,
+            token: localStorage.getItem('authToken') || null,
             lastSync: null
         };
 
@@ -1586,7 +1577,7 @@
 
         // 登录认证
         function checkAuth() {
-            if (authState.token && authState.gistId) {
+            if (authState.token) {
                 // 验证token
                 verifyToken();
             }
@@ -1594,11 +1585,9 @@
 
         async function verifyToken() {
             try {
-                // 验证 GitHub Token 是否有效
-                const response = await fetch('https://api.github.com/user', {
+                const response = await fetch('/api/auth/verify', {
                     headers: {
-                        'Authorization': `token ${authState.token}`,
-                        'Accept': 'application/vnd.github.v3+json'
+                        'Authorization': `Bearer ${authState.token}`
                     }
                 });
 
@@ -1612,113 +1601,56 @@
                 }
             } catch (error) {
                 console.error('验证失败:', error);
+                // 网络错误时保持登录状态，使用本地缓存
+                authState.isLoggedIn = true;
+                updateAuthUI();
             }
         }
 
         function showLoginModal() {
-            // 预填已保存的 Gist ID
-            if (authState.gistId) {
-                document.getElementById('gistId').value = authState.gistId;
-            }
             showModal('loginModal');
         }
 
         async function handleLogin(event) {
             event.preventDefault();
 
-            const token = document.getElementById('loginPassword').value.trim();
-            const gistId = document.getElementById('gistId').value.trim();
-
-            if (!token) {
-                showToast('连接失败', '请输入 GitHub Token', 'error');
-                return;
-            }
+            const password = document.getElementById('loginPassword').value;
 
             try {
-                // 验证 Token
-                const userResponse = await fetch('https://api.github.com/user', {
-                    headers: {
-                        'Authorization': `token ${token}`,
-                        'Accept': 'application/vnd.github.v3+json'
-                    }
+                const response = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ password })
                 });
 
-                if (!userResponse.ok) {
-                    showToast('连接失败', 'GitHub Token 无效', 'error');
-                    return;
-                }
+                const result = await response.json();
 
-                authState.token = token;
-                localStorage.setItem('githubToken', token);
+                if (response.ok && result.success) {
+                    authState.token = result.token;
+                    authState.isLoggedIn = true;
+                    localStorage.setItem('authToken', result.token);
 
-                if (gistId) {
-                    // 验证 Gist 是否存在且可访问
-                    const gistResponse = await fetch(`https://api.github.com/gists/${gistId}`, {
-                        headers: {
-                            'Authorization': `token ${token}`,
-                            'Accept': 'application/vnd.github.v3+json'
-                        }
-                    });
+                    updateAuthUI();
+                    closeModal('loginModal');
+                    showToast('登录成功', '已连接到云端', 'success');
 
-                    if (!gistResponse.ok) {
-                        showToast('连接失败', 'Gist ID 无效或无权访问', 'error');
-                        return;
-                    }
-
-                    authState.gistId = gistId;
-                    localStorage.setItem('gistId', gistId);
+                    // 加载云端数据
+                    await loadFromCloud();
                 } else {
-                    // 创建新的 Gist
-                    const createResponse = await fetch('https://api.github.com/gists', {
-                        method: 'POST',
-                        headers: {
-                            'Authorization': `token ${token}`,
-                            'Accept': 'application/vnd.github.v3+json',
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({
-                            description: '提示词管理工具 - 数据同步',
-                            public: false,
-                            files: {
-                                'prompt-manager-data.json': {
-                                    content: JSON.stringify(appData, null, 2)
-                                }
-                            }
-                        })
-                    });
-
-                    if (!createResponse.ok) {
-                        showToast('连接失败', '创建 Gist 失败', 'error');
-                        return;
-                    }
-
-                    const newGist = await createResponse.json();
-                    authState.gistId = newGist.id;
-                    localStorage.setItem('gistId', newGist.id);
-                    showToast('创建成功', `已创建新的同步 Gist: ${newGist.id}`, 'success');
+                    showToast('登录失败', result.error || '密码错误', 'error');
                 }
-
-                authState.isLoggedIn = true;
-                updateAuthUI();
-                closeModal('loginModal');
-                showToast('连接成功', '已连接到 GitHub Gist', 'success');
-
-                // 加载云端数据
-                await loadFromCloud();
             } catch (error) {
-                showToast('连接失败', error.message, 'error');
+                showToast('登录失败', '无法连接到服务器', 'error');
             }
         }
 
         function logout() {
             authState.isLoggedIn = false;
             authState.token = null;
-            authState.gistId = null;
-            localStorage.removeItem('githubToken');
-            localStorage.removeItem('gistId');
+            localStorage.removeItem('authToken');
             updateAuthUI();
             renderPrompts(); // 重新渲染以隐藏私密提示词
-            showToast('已断开', '已断开云端同步连接', 'info');
+            showToast('已退出', '已退出登录', 'info');
         }
 
         function updateAuthUI() {
@@ -1729,29 +1661,29 @@
             const statusDot = statusIndicator.querySelector('.status-dot');
 
             if (authState.isLoggedIn) {
-                loginBtn.textContent = '🚪 断开连接';
+                loginBtn.textContent = '🚪 退出';
                 loginBtn.onclick = logout;
                 syncBtn.style.display = 'inline-flex';
                 statusDot.classList.add('online');
-                statusText.textContent = '已连接';
+                statusText.textContent = '已登录';
 
                 if (authState.lastSync) {
                     const syncTime = new Date(authState.lastSync).toLocaleTimeString();
                     statusText.textContent = `已同步 ${syncTime}`;
                 }
             } else {
-                loginBtn.textContent = '🔐 同步设置';
+                loginBtn.textContent = '🔐 登录';
                 loginBtn.onclick = showLoginModal;
                 syncBtn.style.display = 'none';
                 statusDot.classList.remove('online');
-                statusText.textContent = '未连接';
+                statusText.textContent = '未登录';
             }
         }
 
         // 云端同步
         async function syncToCloud(silent = false) {
-            if (!authState.isLoggedIn || !authState.gistId) {
-                if (!silent) showToast('同步失败', '请先配置云端同步', 'error');
+            if (!authState.isLoggedIn) {
+                if (!silent) showToast('同步失败', '请先登录', 'error');
                 return;
             }
 
@@ -1762,62 +1694,61 @@
                 syncBtn.innerHTML = '<span class="loading"></span> 同步中';
                 syncBtn.disabled = true;
 
-                // 更新 Gist
-                const response = await fetch(`https://api.github.com/gists/${authState.gistId}`, {
-                    method: 'PATCH',
+                const response = await fetch('/api/data/sync', {
+                    method: 'POST',
                     headers: {
-                        'Authorization': `token ${authState.token}`,
-                        'Accept': 'application/vnd.github.v3+json',
+                        'Authorization': `Bearer ${authState.token}`,
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({
-                        files: {
-                            'prompt-manager-data.json': {
-                                content: JSON.stringify(appData, null, 2)
-                            }
-                        }
-                    })
+                    body: JSON.stringify(appData)
                 });
 
                 syncBtn.innerHTML = originalText;
                 syncBtn.disabled = false;
 
                 if (response.ok) {
-                    authState.lastSync = new Date().toISOString();
-                    updateAuthUI();
-                    if (!silent) showToast('同步成功', '数据已同步到 GitHub Gist', 'success');
+                    const result = await response.json();
+                    if (result.success) {
+                        authState.lastSync = new Date().toISOString();
+                        updateAuthUI();
+                        if (!silent) showToast('同步成功', '数据已同步到云端', 'success');
+                    } else {
+                        if (!silent) showToast('同步失败', result.error || '未知错误', 'error');
+                    }
                 } else {
-                    if (!silent) showToast('同步失败', '无法更新 Gist', 'error');
+                    if (response.status === 401) {
+                        logout();
+                        if (!silent) showToast('同步失败', '登录已过期，请重新登录', 'error');
+                    } else {
+                        if (!silent) showToast('同步失败', '服务器错误', 'error');
+                    }
                 }
             } catch (error) {
                 const syncBtn = document.getElementById('syncBtn');
                 syncBtn.innerHTML = '☁️ 同步';
                 syncBtn.disabled = false;
-                if (!silent) showToast('同步失败', error.message, 'error');
+                if (!silent) showToast('同步失败', '无法连接到服务器', 'error');
             }
         }
 
         async function loadFromCloud(silent = false) {
-            if (!authState.isLoggedIn || !authState.gistId) {
-                if (!silent) showToast('加载失败', '请先配置云端同步', 'error');
+            if (!authState.isLoggedIn) {
+                if (!silent) showToast('加载失败', '请先登录', 'error');
                 return;
             }
 
             try {
-                // 获取 Gist 数据
-                const response = await fetch(`https://api.github.com/gists/${authState.gistId}`, {
+                const response = await fetch('/api/data/load', {
                     headers: {
-                        'Authorization': `token ${authState.token}`,
-                        'Accept': 'application/vnd.github.v3+json'
+                        'Authorization': `Bearer ${authState.token}`
                     }
                 });
 
                 if (response.ok) {
-                    const gist = await response.json();
-                    const dataFile = gist.files['prompt-manager-data.json'];
+                    const result = await response.json();
 
-                    if (dataFile && dataFile.content) {
-                        const cloudData = JSON.parse(dataFile.content);
+                    if (result.data) {
+                        const cloudData = result.data;
 
                         // 合并数据：云端数据优先，但保留本地独有的数据
                         if (cloudData.prompts && Array.isArray(cloudData.prompts)) {
@@ -1837,16 +1768,25 @@
                             renderPrompts();
                             updateCategories();
                         }
-                    }
 
-                    authState.lastSync = new Date().toISOString();
-                    updateAuthUI();
-                    if (!silent) showToast('加载成功', '已从 GitHub Gist 加载数据', 'success');
+                        authState.lastSync = result.lastSync ? new Date(result.lastSync).toISOString() : new Date().toISOString();
+                        updateAuthUI();
+                        if (!silent) showToast('加载成功', '已从云端加载数据', 'success');
+                    } else {
+                        // 云端没有数据，上传本地数据
+                        if (!silent) showToast('提示', '云端暂无数据，将上传本地数据', 'info');
+                        await syncToCloud(silent);
+                    }
                 } else {
-                    if (!silent) showToast('加载失败', '无法读取 Gist', 'error');
+                    if (response.status === 401) {
+                        logout();
+                        if (!silent) showToast('加载失败', '登录已过期，请重新登录', 'error');
+                    } else {
+                        if (!silent) showToast('加载失败', '服务器错误', 'error');
+                    }
                 }
             } catch (error) {
-                if (!silent) showToast('加载失败', error.message, 'error');
+                if (!silent) showToast('加载失败', '无法连接到服务器', 'error');
             }
         }
 
