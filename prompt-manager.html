@@ -1245,13 +1245,19 @@
             const grid = document.getElementById('promptsGrid');
             const emptyState = document.getElementById('emptyState');
 
+            console.log('=== DEBUG renderPrompts ===');
+            console.log('登录状态:', authState.isLoggedIn);
+
             // 获取筛选后的提示词
             let prompts = getFilteredPrompts();
+
+            console.log('筛选后提示词数量:', prompts.length);
 
             // 应用排序
             prompts = sortPromptsList(prompts);
 
             if (prompts.length === 0) {
+                console.log('没有提示词,显示空状态');
                 grid.innerHTML = '';
                 emptyState.style.display = 'block';
                 return;
@@ -1259,6 +1265,7 @@
 
             emptyState.style.display = 'none';
 
+            let renderedCount = 0;
             grid.innerHTML = prompts.map(prompt => {
                 const isPrivate = prompt.isPrivate === true; // 明确判断是否为私密
                 const isPinned = prompt.isPinned || false;
@@ -1269,7 +1276,13 @@
 
                 // 未登录时隐藏私密提示词(只隐藏isPrivate=true的)
                 if (isPrivate && !authState.isLoggedIn) {
+                    console.log('隐藏私密提示词:', prompt.title);
                     return '';
+                }
+
+                renderedCount++;
+                if (renderedCount === 1) {
+                    console.log('渲染第一个提示词:', prompt.title, '| isPrivate:', isPrivate);
                 }
 
                 return `
@@ -1305,6 +1318,9 @@
                     </div>
                 `;
             }).join('');
+
+            console.log('实际渲染的提示词数量:', renderedCount);
+            console.log('=== renderPrompts END ===');
         }
 
         // 筛选提示词
@@ -1313,7 +1329,12 @@
             const visibilityFilter = document.getElementById('visibilityFilter').value;
             const categoryFilter = document.getElementById('categoryFilter').value;
 
-            return appData.prompts.filter(prompt => {
+            console.log('=== DEBUG getFilteredPrompts ===');
+            console.log('总提示词数量:', appData.prompts.length);
+            console.log('可见性筛选器:', visibilityFilter);
+            console.log('登录状态:', authState.isLoggedIn);
+
+            const filtered = appData.prompts.filter(prompt => {
                 // 搜索过滤
                 const matchesSearch = !searchTerm ||
                     prompt.title.toLowerCase().includes(searchTerm) ||
@@ -1337,8 +1358,27 @@
                 const matchesCategory = categoryFilter === 'all' ||
                     prompt.category === categoryFilter;
 
-                return matchesSearch && matchesVisibility && matchesCategory;
+                const result = matchesSearch && matchesVisibility && matchesCategory;
+
+                // 调试第一个提示词
+                if (prompt === appData.prompts[0]) {
+                    console.log('第一个提示词调试:');
+                    console.log('  标题:', prompt.title);
+                    console.log('  isPrivate字段值:', prompt.isPrivate);
+                    console.log('  isPrivate === true:', isPrivate);
+                    console.log('  matchesSearch:', matchesSearch);
+                    console.log('  matchesVisibility:', matchesVisibility);
+                    console.log('  matchesCategory:', matchesCategory);
+                    console.log('  最终结果:', result);
+                }
+
+                return result;
             });
+
+            console.log('筛选后数量:', filtered.length);
+            console.log('=== DEBUG END ===');
+
+            return filtered;
         }
 
         // 排序提示词
