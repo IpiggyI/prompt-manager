@@ -663,14 +663,29 @@
         }
 
         .card-content {
+            margin-bottom: var(--space-lg);
+        }
+
+        .card-description {
             color: var(--text-secondary);
             font-size: var(--font-sm);
             line-height: 1.6;
-            margin-bottom: var(--space-lg);
             display: -webkit-box;
-            -webkit-line-clamp: 3;
+            -webkit-line-clamp: 2;
             -webkit-box-orient: vertical;
             overflow: hidden;
+        }
+
+        .card-preview {
+            color: var(--text-muted);
+            font-size: var(--font-xs);
+            line-height: 1.5;
+            margin-top: var(--space-sm);
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            opacity: 0.7;
         }
 
         .card-footer {
@@ -1735,7 +1750,10 @@
                                 </span>
                             </div>
                         </div>
-                        <div class="card-content">${escapeHtml(prompt.content)}</div>
+                        <div class="card-content">
+                            ${prompt.description ? `<div class="card-description">${escapeHtml(prompt.description)}</div>` : ''}
+                            <div class="card-preview">${escapeHtml(prompt.content)}</div>
+                        </div>
                         <div class="card-footer">
                             <div class="card-meta">
                                 <span class="card-meta-item">
