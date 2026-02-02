@@ -2,7 +2,7 @@
 <!--
   制作者：YN
   日期：2025-11-28
-  版本：v2.0 - 现代化UI重构版
+  版本：v3.0 - 现代化UI重构版（SaaS + Glassmorphism）
 -->
 <html lang="zh-CN">
 <head>
@@ -10,177 +10,310 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>提示词管理工具</title>
     <style>
+        /* ===== 设计系统 (Design Tokens) ===== */
         :root {
-            /* 主色系 - 更现代的配色 */
-            --primary-color: #6366f1;
-            --primary-dark: #4f46e5;
-            --primary-light: #818cf8;
-            --success-color: #10b981;
-            --success-dark: #059669;
-            --warning-color: #f59e0b;
-            --warning-dark: #d97706;
-            --danger-color: #ef4444;
-            --danger-dark: #dc2626;
-            --info-color: #3b82f6;
-            --info-dark: #2563eb;
+            /* 主色系 - Indigo/Violet */
+            --primary-hue: 250;
+            --primary: hsl(var(--primary-hue), 90%, 60%);
+            --primary-hover: hsl(var(--primary-hue), 90%, 50%);
+            --primary-light: hsl(var(--primary-hue), 90%, 95%);
+            --primary-glow: hsla(var(--primary-hue), 90%, 60%, 0.3);
 
-            /* 中性色系 */
-            --background-color: #f8fafc;
-            --surface-color: #ffffff;
-            --border-color: #e2e8f0;
-            --border-light: #f1f5f9;
-            --text-primary: #1e293b;
-            --text-secondary: #64748b;
+            /* 语义色 */
+            --success: #10b981;
+            --success-light: rgba(16, 185, 129, 0.1);
+            --warning: #f59e0b;
+            --warning-light: rgba(245, 158, 11, 0.1);
+            --danger: #ef4444;
+            --danger-light: rgba(239, 68, 68, 0.1);
+            --info: #3b82f6;
+
+            /* 亮色主题 */
+            --bg-body: #f1f5f9;
+            --bg-card: #ffffff;
+            --bg-elevated: #ffffff;
+            --bg-glass: rgba(255, 255, 255, 0.8);
+            --bg-input: #ffffff;
+            --text-primary: #0f172a;
+            --text-secondary: #475569;
             --text-muted: #94a3b8;
-            --text-inverse: #ffffff;
+            --border-color: #e2e8f0;
+            --border-subtle: rgba(0, 0, 0, 0.06);
+            --divider: #f1f5f9;
 
-            /* 暗色主题 */
-            --dark-background: #0f172a;
-            --dark-surface: #1e293b;
-            --dark-surface-light: #334155;
-            --dark-border: #334155;
-            --dark-text-primary: #f1f5f9;
-            --dark-text-secondary: #cbd5e1;
-            --dark-text-muted: #94a3b8;
+            /* 阴影系统 */
+            --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.04);
+            --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
+            --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.12);
+            --shadow-xl: 0 16px 48px rgba(0, 0, 0, 0.16);
+            --shadow-glow: 0 0 20px var(--primary-glow);
+
+            /* 玻璃效果 */
+            --blur-glass: blur(16px);
+            --blur-overlay: blur(8px);
 
             /* 间距系统 */
-            --spacing-xs: 4px;
-            --spacing-sm: 8px;
-            --spacing-md: 12px;
-            --spacing-lg: 16px;
-            --spacing-xl: 20px;
-            --spacing-xxl: 24px;
-            --spacing-xxxl: 32px;
+            --space-xs: 4px;
+            --space-sm: 8px;
+            --space-md: 12px;
+            --space-lg: 16px;
+            --space-xl: 24px;
+            --space-2xl: 32px;
+            --space-3xl: 48px;
 
             /* 字体系统 */
-            --font-size-xs: 12px;
-            --font-size-sm: 14px;
-            --font-size-md: 16px;
-            --font-size-lg: 18px;
-            --font-size-xl: 20px;
-            --font-size-xxl: 24px;
-            --font-size-xxxl: 32px;
+            --font-xs: 12px;
+            --font-sm: 13px;
+            --font-base: 14px;
+            --font-md: 15px;
+            --font-lg: 17px;
+            --font-xl: 20px;
+            --font-2xl: 24px;
+            --font-3xl: 32px;
 
             /* 圆角系统 */
             --radius-sm: 6px;
-            --radius-md: 8px;
-            --radius-lg: 12px;
-            --radius-xl: 16px;
+            --radius-md: 10px;
+            --radius-lg: 14px;
+            --radius-xl: 20px;
             --radius-full: 9999px;
 
-            /* 阴影系统 */
-            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-            --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+            /* 布局 */
+            --sidebar-width: 260px;
+            --topbar-height: 64px;
+            --transition-fast: 0.15s ease;
+            --transition-normal: 0.25s ease;
+            --transition-slow: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        * {
+        /* 暗色主题 */
+        [data-theme="dark"] {
+            --bg-body: #0c1222;
+            --bg-card: #1a2332;
+            --bg-elevated: #1e293b;
+            --bg-glass: rgba(26, 35, 50, 0.85);
+            --bg-input: #0f172a;
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+            --border-color: #334155;
+            --border-subtle: rgba(255, 255, 255, 0.08);
+            --divider: #1e293b;
+            --primary-light: hsla(var(--primary-hue), 90%, 60%, 0.15);
+        }
+
+        /* ===== 重置样式 ===== */
+        *, *::before, *::after {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
 
+        html {
+            font-size: 16px;
+            -webkit-text-size-adjust: 100%;
+        }
+
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            background: var(--background-color);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'SF Pro Display', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: var(--bg-body);
             color: var(--text-primary);
-            font-size: var(--font-size-md);
-            line-height: 1.6;
-            transition: background-color 0.3s ease, color 0.3s ease;
+            line-height: 1.5;
+            min-height: 100vh;
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
+            overflow-x: hidden;
         }
 
-        body.dark-theme {
-            background: var(--dark-background);
-            color: var(--dark-text-primary);
+        a { color: inherit; text-decoration: none; }
+        button { font-family: inherit; cursor: pointer; }
+        input, textarea, select { font-family: inherit; }
+
+        /* 模态框打开时锁定背景滚动 */
+        body.modal-open {
+            overflow: hidden;
         }
 
-        /* 容器 */
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: var(--spacing-xl);
+        /* 视觉隐藏但保留可访问性 */
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
         }
 
-        /* 头部 */
-        .header {
-            background: var(--surface-color);
-            border-radius: var(--radius-xl);
-            padding: var(--spacing-xxl);
-            margin-bottom: var(--spacing-xl);
-            box-shadow: var(--shadow-md);
-            transition: all 0.3s ease;
-        }
-
-        body.dark-theme .header {
-            background: var(--dark-surface);
-        }
-
-        .header-content {
-            display: flex;
-            justify-content: space-between;
+        /* ===== 工具类 ===== */
+        .icon {
+            width: 20px;
+            height: 20px;
+            display: inline-flex;
             align-items: center;
-            gap: var(--spacing-lg);
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        .icon svg {
+            width: 100%;
+            height: 100%;
+            stroke: currentColor;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            fill: none;
+        }
+        .icon-sm { width: 16px; height: 16px; }
+        .icon-lg { width: 24px; height: 24px; }
+
+        .desktop-only { display: none; }
+        .mobile-only { display: flex; }
+
+        @media (min-width: 768px) {
+            .desktop-only { display: flex; }
+            .mobile-only { display: none; }
         }
 
-        .header-left {
-            flex: 1;
+        /* ===== App Shell 布局 ===== */
+        .app-shell {
+            display: flex;
+            min-height: 100vh;
         }
 
-        .header-title {
-            font-size: var(--font-size-xxxl);
+        /* ===== 侧边栏 ===== */
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: var(--sidebar-width);
+            background: var(--bg-glass);
+            backdrop-filter: var(--blur-glass);
+            -webkit-backdrop-filter: var(--blur-glass);
+            border-right: 1px solid var(--border-subtle);
+            display: flex;
+            flex-direction: column;
+            z-index: 100;
+            transform: translateX(-100%);
+            transition: transform var(--transition-slow);
+        }
+
+        .sidebar.open {
+            transform: translateX(0);
+        }
+
+        @media (min-width: 1024px) {
+            .sidebar {
+                transform: translateX(0);
+            }
+        }
+
+        .sidebar-header {
+            padding: var(--space-xl);
+            border-bottom: 1px solid var(--border-subtle);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: var(--space-md);
+            font-size: var(--font-lg);
             font-weight: 700;
-            margin-bottom: var(--spacing-sm);
-            background: linear-gradient(135deg, var(--primary-color), var(--info-color));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+            color: var(--text-primary);
         }
 
-        .header-subtitle {
+        .logo-icon {
+            width: 36px;
+            height: 36px;
+            background: linear-gradient(135deg, var(--primary), hsl(280, 90%, 60%));
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+
+        .sidebar-nav {
+            flex: 1;
+            padding: var(--space-lg);
+            overflow-y: auto;
+        }
+
+        .nav-section {
+            margin-bottom: var(--space-xl);
+        }
+
+        .nav-section-title {
+            font-size: var(--font-xs);
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            padding: 0 var(--space-md);
+            margin-bottom: var(--space-sm);
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: var(--space-md);
+            padding: var(--space-md) var(--space-md);
+            border-radius: var(--radius-md);
             color: var(--text-secondary);
-            font-size: var(--font-size-sm);
+            font-size: var(--font-base);
+            font-weight: 500;
+            border: none;
+            background: transparent;
+            width: 100%;
+            text-align: left;
+            transition: all var(--transition-fast);
+            cursor: pointer;
         }
 
-        body.dark-theme .header-subtitle {
-            color: var(--dark-text-secondary);
+        .nav-item:hover {
+            background: var(--primary-light);
+            color: var(--primary);
         }
 
-        /* 头部控制按钮组 */
-        .header-controls {
-            display: flex;
-            align-items: center;
-            gap: var(--spacing-md);
+        .nav-item.active {
+            background: var(--primary-light);
+            color: var(--primary);
         }
 
-        /* 状态指示器 */
-        .status-indicator {
-            display: flex;
-            align-items: center;
-            gap: var(--spacing-sm);
-            padding: var(--spacing-sm) var(--spacing-lg);
-            background: var(--background-color);
+        .nav-item-count {
+            margin-left: auto;
+            font-size: var(--font-xs);
+            color: var(--text-muted);
+            background: var(--bg-body);
+            padding: 2px 8px;
             border-radius: var(--radius-full);
-            font-size: var(--font-size-sm);
-            color: var(--text-secondary);
         }
 
-        body.dark-theme .status-indicator {
-            background: var(--dark-background);
-            color: var(--dark-text-secondary);
+        .sidebar-footer {
+            padding: var(--space-lg);
+            border-top: 1px solid var(--border-subtle);
         }
 
-        .status-dot {
+        .sync-status {
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+            font-size: var(--font-sm);
+            color: var(--text-muted);
+        }
+
+        .sync-dot {
             width: 8px;
             height: 8px;
             border-radius: 50%;
             background: var(--text-muted);
         }
 
-        .status-dot.online {
-            background: var(--success-color);
+        .sync-dot.online {
+            background: var(--success);
+            box-shadow: 0 0 8px var(--success);
             animation: pulse 2s infinite;
         }
 
@@ -189,745 +322,617 @@
             50% { opacity: 0.5; }
         }
 
-        /* 按钮组 */
-        .btn-group {
-            display: flex;
-            gap: var(--spacing-sm);
+        /* ===== 主内容区 ===== */
+        .main-content {
+            flex: 1;
+            margin-left: 0;
+            min-width: 0;
+            transition: margin var(--transition-slow);
         }
 
-        .btn {
-            padding: var(--spacing-sm) var(--spacing-lg);
-            border: none;
-            border-radius: var(--radius-md);
-            cursor: pointer;
-            font-weight: 500;
-            font-size: var(--font-size-sm);
-            transition: all 0.2s ease;
-            display: inline-flex;
+        @media (min-width: 1024px) {
+            .main-content {
+                margin-left: var(--sidebar-width);
+            }
+        }
+
+        /* ===== 顶部栏 ===== */
+        .topbar {
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            height: var(--topbar-height);
+            background: var(--bg-glass);
+            backdrop-filter: var(--blur-glass);
+            -webkit-backdrop-filter: var(--blur-glass);
+            border-bottom: 1px solid var(--border-subtle);
+            display: flex;
+            align-items: center;
+            padding: 0 var(--space-xl);
+            gap: var(--space-lg);
+        }
+
+        .menu-toggle {
+            display: flex;
             align-items: center;
             justify-content: center;
-            gap: var(--spacing-xs);
-            min-height: 36px;
-            white-space: nowrap;
+            width: 40px;
+            height: 40px;
+            border: none;
+            background: transparent;
+            color: var(--text-secondary);
+            border-radius: var(--radius-md);
+            transition: all var(--transition-fast);
         }
 
-        .btn:active {
-            transform: scale(0.98);
+        .menu-toggle:hover {
+            background: var(--primary-light);
+            color: var(--primary);
         }
 
-        .btn-primary {
-            background: var(--primary-color);
-            color: var(--text-inverse);
+        @media (min-width: 1024px) {
+            .menu-toggle { display: none; }
         }
 
-        .btn-primary:hover {
-            background: var(--primary-dark);
-        }
-
-        .btn-success {
-            background: var(--success-color);
-            color: var(--text-inverse);
-        }
-
-        .btn-success:hover {
-            background: var(--success-dark);
-        }
-
-        .btn-secondary {
-            background: var(--border-color);
-            color: var(--text-primary);
-        }
-
-        body.dark-theme .btn-secondary {
-            background: var(--dark-border);
-            color: var(--dark-text-primary);
-        }
-
-        .btn-secondary:hover {
-            background: var(--text-muted);
-        }
-
-        .btn-icon {
-            width: 36px;
-            height: 36px;
-            padding: 0;
-            border-radius: var(--radius-full);
-            background: var(--background-color);
-            color: var(--text-primary);
-            border: 2px solid var(--border-color);
-        }
-
-        body.dark-theme .btn-icon {
-            background: var(--dark-background);
-            color: var(--dark-text-primary);
-            border-color: var(--dark-border);
-        }
-
-        .btn-icon:hover {
-            background: var(--primary-color);
-            color: var(--text-inverse);
-            border-color: var(--primary-color);
-        }
-
-        /* 工具栏 */
-        .toolbar {
-            background: var(--surface-color);
-            border-radius: var(--radius-lg);
-            padding: var(--spacing-lg);
-            margin-bottom: var(--spacing-lg);
-            box-shadow: var(--shadow-sm);
-            display: flex;
-            flex-wrap: wrap;
-            gap: var(--spacing-md);
-            align-items: center;
-        }
-
-        body.dark-theme .toolbar {
-            background: var(--dark-surface);
-        }
-
-        .search-box {
+        .search-container {
             flex: 1;
-            min-width: 200px;
+            max-width: 480px;
             position: relative;
         }
 
         .search-input {
             width: 100%;
-            padding: var(--spacing-sm) var(--spacing-md) var(--spacing-sm) 40px;
-            border: 2px solid var(--border-color);
-            border-radius: var(--radius-md);
-            font-size: var(--font-size-sm);
-            background: var(--background-color);
+            height: 40px;
+            padding: 0 var(--space-lg) 0 44px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-full);
+            font-size: var(--font-base);
+            background: var(--bg-input);
             color: var(--text-primary);
-            transition: all 0.2s ease;
+            transition: all var(--transition-fast);
         }
 
-        body.dark-theme .search-input {
-            background: var(--dark-background);
-            color: var(--dark-text-primary);
-            border-color: var(--dark-border);
+        .search-input::placeholder {
+            color: var(--text-muted);
         }
 
         .search-input:focus {
             outline: none;
-            border-color: var(--primary-color);
-            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px var(--primary-light);
         }
 
         .search-icon {
             position: absolute;
-            left: var(--spacing-md);
+            left: var(--space-lg);
             top: 50%;
             transform: translateY(-50%);
             color: var(--text-muted);
             pointer-events: none;
         }
 
+        .topbar-actions {
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+
+        /* ===== 按钮系统 ===== */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: var(--space-sm);
+            padding: 0 var(--space-lg);
+            height: 40px;
+            border-radius: var(--radius-md);
+            font-size: var(--font-base);
+            font-weight: 500;
+            border: none;
+            transition: all var(--transition-fast);
+            white-space: nowrap;
+        }
+
+        .btn:active {
+            transform: scale(0.97);
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-hover);
+            box-shadow: var(--shadow-glow);
+        }
+
+        .btn-secondary {
+            background: var(--bg-card);
+            color: var(--text-secondary);
+            border: 1px solid var(--border-color);
+        }
+
+        .btn-secondary:hover {
+            background: var(--primary-light);
+            color: var(--primary);
+            border-color: var(--primary);
+        }
+
+        .btn-ghost {
+            background: transparent;
+            color: var(--text-secondary);
+        }
+
+        .btn-ghost:hover {
+            background: var(--primary-light);
+            color: var(--primary);
+        }
+
+        .btn-danger {
+            background: var(--danger-light);
+            color: var(--danger);
+        }
+
+        .btn-danger:hover {
+            background: var(--danger);
+            color: white;
+        }
+
+        .btn-icon {
+            width: 40px;
+            height: 40px;
+            padding: 0;
+            border-radius: var(--radius-md);
+        }
+
+        .btn-sm {
+            height: 32px;
+            padding: 0 var(--space-md);
+            font-size: var(--font-sm);
+        }
+
+        .btn-sm.btn-icon {
+            width: 32px;
+            padding: 0;
+        }
+
+        /* ===== 内容区域 ===== */
+        .content-area {
+            padding: var(--space-xl);
+        }
+
+        @media (min-width: 768px) {
+            .content-area {
+                padding: var(--space-2xl);
+            }
+        }
+
+        /* ===== 工具栏 ===== */
+        .toolbar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: var(--space-md);
+            margin-bottom: var(--space-xl);
+        }
+
         .filter-group {
             display: flex;
-            gap: var(--spacing-sm);
-            align-items: center;
+            gap: var(--space-sm);
+            flex-wrap: wrap;
         }
 
         .select-control {
-            padding: var(--spacing-sm) var(--spacing-md);
-            border: 2px solid var(--border-color);
+            height: 36px;
+            padding: 0 var(--space-lg) 0 var(--space-md);
+            border: 1px solid var(--border-color);
             border-radius: var(--radius-md);
-            font-size: var(--font-size-sm);
-            background: var(--background-color);
+            font-size: var(--font-sm);
+            background: var(--bg-card);
             color: var(--text-primary);
             cursor: pointer;
             min-width: 120px;
-        }
-
-        body.dark-theme .select-control {
-            background: var(--dark-background);
-            color: var(--dark-text-primary);
-            border-color: var(--dark-border);
+            transition: all var(--transition-fast);
         }
 
         .select-control:focus {
             outline: none;
-            border-color: var(--primary-color);
+            border-color: var(--primary);
         }
 
-        /* 提示词网格 */
+        /* ===== 提示词卡片网格 ===== */
         .prompts-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-            gap: var(--spacing-lg);
+            grid-template-columns: 1fr;
+            gap: var(--space-lg);
         }
 
+        @media (min-width: 640px) {
+            .prompts-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .prompts-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (min-width: 1280px) {
+            .prompts-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        @media (min-width: 1536px) {
+            .prompts-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+
+        /* ===== 提示词卡片 ===== */
         .prompt-card {
-            background: var(--surface-color);
-            border: 2px solid var(--border-light);
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
             border-radius: var(--radius-lg);
-            padding: var(--spacing-lg);
-            transition: all 0.3s ease;
+            padding: var(--space-xl);
             cursor: pointer;
+            transition: all var(--transition-normal);
             position: relative;
             overflow: hidden;
         }
 
-        body.dark-theme .prompt-card {
-            background: var(--dark-surface);
-            border-color: var(--dark-border);
+        .prompt-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: var(--success);
+            opacity: 0;
+            transition: opacity var(--transition-fast);
+        }
+
+        .prompt-card.private::before {
+            background: var(--warning);
         }
 
         .prompt-card:hover {
             transform: translateY(-4px);
             box-shadow: var(--shadow-lg);
-            border-color: var(--primary-color);
+            border-color: var(--primary);
         }
 
-        .prompt-card.private {
-            border-left: 4px solid var(--warning-color);
+        .prompt-card:hover::before {
+            opacity: 1;
         }
 
-        .prompt-card.public {
-            border-left: 4px solid var(--success-color);
-        }
-
-        .prompt-header {
+        .card-header {
             display: flex;
             justify-content: space-between;
             align-items: flex-start;
-            margin-bottom: var(--spacing-md);
-            gap: var(--spacing-sm);
+            margin-bottom: var(--space-md);
+            gap: var(--space-sm);
         }
 
-        .prompt-title {
-            font-size: var(--font-size-lg);
+        .card-title {
+            font-size: var(--font-md);
             font-weight: 600;
             color: var(--text-primary);
+            line-height: 1.4;
             flex: 1;
             word-break: break-word;
         }
 
-        body.dark-theme .prompt-title {
-            color: var(--dark-text-primary);
-        }
-
-        .prompt-badges {
+        .card-badges {
             display: flex;
-            gap: var(--spacing-xs);
+            gap: var(--space-xs);
             flex-shrink: 0;
         }
 
         .badge {
-            padding: 2px 8px;
-            border-radius: var(--radius-sm);
-            font-size: var(--font-size-xs);
-            font-weight: 600;
-            white-space: nowrap;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 10px;
+            border-radius: var(--radius-full);
+            font-size: var(--font-xs);
+            font-weight: 500;
         }
 
         .badge-private {
-            background: rgba(245, 158, 11, 0.1);
-            color: var(--warning-dark);
+            background: var(--warning-light);
+            color: var(--warning);
         }
 
         .badge-public {
-            background: rgba(16, 185, 129, 0.1);
-            color: var(--success-dark);
+            background: var(--success-light);
+            color: var(--success);
         }
 
         .badge-pinned {
-            background: rgba(99, 102, 241, 0.1);
-            color: var(--primary-dark);
+            background: var(--primary-light);
+            color: var(--primary);
         }
 
-        .prompt-content {
+        .badge-category {
+            background: var(--bg-body);
             color: var(--text-secondary);
-            font-size: var(--font-size-sm);
+        }
+
+        .card-content {
+            color: var(--text-secondary);
+            font-size: var(--font-sm);
             line-height: 1.6;
-            margin-bottom: var(--spacing-md);
-            max-height: 100px;
-            overflow: hidden;
+            margin-bottom: var(--space-lg);
             display: -webkit-box;
-            -webkit-line-clamp: 4;
+            -webkit-line-clamp: 3;
             -webkit-box-orient: vertical;
+            overflow: hidden;
         }
 
-        body.dark-theme .prompt-content {
-            color: var(--dark-text-secondary);
-        }
-
-        .prompt-footer {
+        .card-footer {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding-top: var(--spacing-md);
-            border-top: 1px solid var(--border-light);
+            padding-top: var(--space-md);
+            border-top: 1px solid var(--divider);
         }
 
-        body.dark-theme .prompt-footer {
-            border-top-color: var(--dark-border);
-        }
-
-        .prompt-meta {
+        .card-meta {
             display: flex;
-            gap: var(--spacing-md);
-            font-size: var(--font-size-xs);
+            gap: var(--space-lg);
+            font-size: var(--font-xs);
             color: var(--text-muted);
         }
 
-        .prompt-actions {
+        .card-meta-item {
             display: flex;
-            gap: var(--spacing-xs);
+            align-items: center;
+            gap: var(--space-xs);
         }
 
-        .btn-sm {
-            padding: 4px 8px;
-            font-size: var(--font-size-xs);
-            min-height: 28px;
+        .card-actions {
+            display: flex;
+            gap: var(--space-xs);
+            opacity: 0;
+            transform: translateX(8px);
+            transition: all var(--transition-fast);
         }
 
-        /* 空状态 */
+        .prompt-card:hover .card-actions {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        /* ===== 空状态 ===== */
         .empty-state {
             text-align: center;
-            padding: var(--spacing-xxxl) var(--spacing-xl);
-            color: var(--text-muted);
+            padding: var(--space-3xl) var(--space-xl);
         }
 
         .empty-icon {
-            font-size: 64px;
-            margin-bottom: var(--spacing-lg);
-            opacity: 0.5;
+            width: 80px;
+            height: 80px;
+            margin: 0 auto var(--space-xl);
+            background: var(--primary-light);
+            border-radius: var(--radius-xl);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary);
         }
 
         .empty-title {
-            font-size: var(--font-size-xl);
+            font-size: var(--font-xl);
             font-weight: 600;
-            margin-bottom: var(--spacing-sm);
-            color: var(--text-secondary);
-        }
-
-        body.dark-theme .empty-title {
-            color: var(--dark-text-secondary);
+            color: var(--text-primary);
+            margin-bottom: var(--space-sm);
         }
 
         .empty-text {
-            font-size: var(--font-size-sm);
+            color: var(--text-muted);
+            margin-bottom: var(--space-xl);
         }
 
-        /* 模态框 */
-        .modal {
-            display: none;
+        /* ===== FAB (浮动操作按钮) ===== */
+        .fab {
             position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.5);
-            backdrop-filter: blur(4px);
-            z-index: 1000;
+            right: var(--space-xl);
+            bottom: var(--space-xl);
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: var(--primary);
+            color: white;
+            border: none;
+            box-shadow: var(--shadow-lg), var(--shadow-glow);
+            display: flex;
             align-items: center;
             justify-content: center;
-            padding: var(--spacing-lg);
+            z-index: 90;
+            transition: all var(--transition-fast);
         }
 
-        .modal.show {
+        .fab:hover {
+            transform: scale(1.1);
+            box-shadow: var(--shadow-xl), 0 0 30px var(--primary-glow);
+        }
+
+        .fab:active {
+            transform: scale(0.95);
+        }
+
+        @media (min-width: 768px) {
+            .fab { display: none; }
+        }
+
+        /* ===== 模态框 ===== */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: var(--blur-overlay);
+            -webkit-backdrop-filter: var(--blur-overlay);
+            z-index: 200;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: var(--space-lg);
+        }
+
+        .modal-overlay.show {
             display: flex;
         }
 
         .modal-content {
-            background: var(--surface-color);
+            background: var(--bg-card);
             border-radius: var(--radius-xl);
             width: 100%;
-            max-width: 600px;
+            max-width: 560px;
             max-height: 90vh;
-            overflow-y: auto;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
             box-shadow: var(--shadow-xl);
-            animation: modalSlideIn 0.3s ease-out;
+            animation: modalEnter 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
 
-        body.dark-theme .modal-content {
-            background: var(--dark-surface);
-        }
-
-        @keyframes modalSlideIn {
+        @keyframes modalEnter {
             from {
                 opacity: 0;
-                transform: translateY(-20px);
+                transform: scale(0.9) translateY(20px);
             }
             to {
                 opacity: 1;
-                transform: translateY(0);
+                transform: scale(1) translateY(0);
             }
         }
 
         .modal-header {
-            padding: var(--spacing-xl);
-            border-bottom: 1px solid var(--border-light);
             display: flex;
-            justify-content: space-between;
             align-items: center;
-        }
-
-        body.dark-theme .modal-header {
-            border-bottom-color: var(--dark-border);
+            justify-content: space-between;
+            padding: var(--space-xl);
+            border-bottom: 1px solid var(--divider);
         }
 
         .modal-title {
-            font-size: var(--font-size-xl);
+            font-size: var(--font-lg);
             font-weight: 600;
         }
 
         .modal-close {
-            background: none;
-            border: none;
-            font-size: var(--font-size-xl);
-            cursor: pointer;
-            color: var(--text-muted);
-            padding: 0;
             width: 32px;
             height: 32px;
+            border: none;
+            background: transparent;
+            color: var(--text-muted);
+            border-radius: var(--radius-md);
             display: flex;
             align-items: center;
             justify-content: center;
-            border-radius: var(--radius-md);
+            transition: all var(--transition-fast);
         }
 
         .modal-close:hover {
-            background: var(--background-color);
-            color: var(--text-primary);
-        }
-
-        body.dark-theme .modal-close:hover {
-            background: var(--dark-background);
-            color: var(--dark-text-primary);
+            background: var(--danger-light);
+            color: var(--danger);
         }
 
         .modal-body {
-            padding: var(--spacing-xl);
+            padding: var(--space-xl);
+            overflow-y: auto;
+            flex: 1;
         }
 
         .modal-footer {
-            padding: var(--spacing-xl);
-            border-top: 1px solid var(--border-light);
             display: flex;
             justify-content: flex-end;
-            gap: var(--spacing-md);
+            gap: var(--space-md);
+            padding: var(--space-xl);
+            border-top: 1px solid var(--divider);
         }
 
-        body.dark-theme .modal-footer {
-            border-top-color: var(--dark-border);
-        }
-
-        /* 表单 */
+        /* ===== 表单 ===== */
         .form-group {
-            margin-bottom: var(--spacing-lg);
+            margin-bottom: var(--space-lg);
         }
 
         .form-label {
             display: block;
-            margin-bottom: var(--spacing-sm);
+            font-size: var(--font-sm);
             font-weight: 500;
             color: var(--text-primary);
-            font-size: var(--font-size-sm);
-        }
-
-        body.dark-theme .form-label {
-            color: var(--dark-text-primary);
+            margin-bottom: var(--space-sm);
         }
 
         .form-control {
             width: 100%;
-            padding: var(--spacing-md);
-            border: 2px solid var(--border-color);
+            padding: var(--space-md);
+            border: 1px solid var(--border-color);
             border-radius: var(--radius-md);
-            font-size: var(--font-size-sm);
-            background: var(--surface-color);
+            font-size: var(--font-base);
+            background: var(--bg-input);
             color: var(--text-primary);
-            transition: all 0.2s ease;
+            transition: all var(--transition-fast);
         }
 
-        body.dark-theme .form-control {
-            background: var(--dark-background);
-            color: var(--dark-text-primary);
-            border-color: var(--dark-border);
+        .form-control::placeholder {
+            color: var(--text-muted);
         }
 
         .form-control:focus {
             outline: none;
-            border-color: var(--primary-color);
-            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px var(--primary-light);
         }
 
         textarea.form-control {
-            min-height: 120px;
+            min-height: 140px;
             resize: vertical;
-            font-family: inherit;
+            font-family: 'SF Mono', 'Fira Code', Consolas, monospace;
+            font-size: var(--font-sm);
+            line-height: 1.6;
         }
 
         .form-hint {
-            margin-top: var(--spacing-xs);
-            font-size: var(--font-size-xs);
+            font-size: var(--font-xs);
             color: var(--text-muted);
+            margin-top: var(--space-xs);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: var(--space-lg);
+        }
+
+        @media (max-width: 480px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
         }
 
         .checkbox-group {
             display: flex;
             align-items: center;
-            gap: var(--spacing-sm);
+            gap: var(--space-sm);
+            cursor: pointer;
         }
 
         .checkbox {
             width: 20px;
             height: 20px;
+            accent-color: var(--primary);
             cursor: pointer;
-            accent-color: var(--primary-color);
         }
 
-        /* Toast通知 */
-        .toast-container {
-            position: fixed;
-            top: var(--spacing-xl);
-            right: var(--spacing-xl);
-            z-index: 2000;
-            display: flex;
-            flex-direction: column;
-            gap: var(--spacing-sm);
-        }
-
-        .toast {
-            background: var(--surface-color);
-            border-radius: var(--radius-lg);
-            padding: var(--spacing-lg);
-            box-shadow: var(--shadow-xl);
-            min-width: 300px;
-            display: flex;
-            align-items: center;
-            gap: var(--spacing-md);
-            animation: toastSlideIn 0.3s ease-out;
-        }
-
-        body.dark-theme .toast {
-            background: var(--dark-surface);
-        }
-
-        @keyframes toastSlideIn {
-            from {
-                opacity: 0;
-                transform: translateX(100%);
-            }
-            to {
-                opacity: 1;
-                transform: translateX(0);
-            }
-        }
-
-        .toast-icon {
-            font-size: var(--font-size-xl);
-            flex-shrink: 0;
-        }
-
-        .toast-content {
-            flex: 1;
-        }
-
-        .toast-title {
-            font-weight: 600;
-            margin-bottom: 2px;
-        }
-
-        .toast-message {
-            font-size: var(--font-size-sm);
-            color: var(--text-secondary);
-        }
-
-        body.dark-theme .toast-message {
-            color: var(--dark-text-secondary);
-        }
-
-        .toast-close {
-            background: none;
-            border: none;
-            cursor: pointer;
-            color: var(--text-muted);
-            padding: 0;
-            font-size: var(--font-size-lg);
-        }
-
-        /* 响应式设计 */
-        @media (max-width: 768px) {
-            .container {
-                padding: var(--spacing-md);
-            }
-
-            .header {
-                padding: var(--spacing-lg);
-            }
-
-            .header-content {
-                flex-direction: column;
-                align-items: stretch;
-            }
-
-            .header-controls {
-                justify-content: space-between;
-            }
-
-            .header-title {
-                font-size: var(--font-size-xxl);
-            }
-
-            .toolbar {
-                flex-direction: column;
-                align-items: stretch;
-            }
-
-            .search-box {
-                width: 100%;
-            }
-
-            .filter-group {
-                flex-wrap: wrap;
-            }
-
-            .prompts-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .modal-content {
-                max-width: 100%;
-            }
-
-            .toast-container {
-                left: var(--spacing-md);
-                right: var(--spacing-md);
-            }
-
-            .toast {
-                min-width: 0;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .header-title {
-                font-size: var(--font-size-xl);
-            }
-
-            .btn-group {
-                flex-wrap: wrap;
-            }
-
-            .status-indicator {
-                font-size: var(--font-size-xs);
-                padding: var(--spacing-xs) var(--spacing-md);
-            }
-        }
-
-        /* 加载动画 */
-        .loading {
-            display: inline-block;
-            width: 20px;
-            height: 20px;
-            border: 3px solid var(--border-color);
-            border-radius: 50%;
-            border-top-color: var(--primary-color);
-            animation: spin 0.8s linear infinite;
-        }
-
-        body.dark-theme .loading {
-            border-color: var(--dark-border);
-            border-top-color: var(--primary-color);
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        /* 详情模态框样式 */
-        .view-description {
-            background: var(--background-color);
-            padding: var(--spacing-md);
-            border-radius: var(--radius-md);
-            margin-bottom: var(--spacing-lg);
-            color: var(--text-secondary);
-            font-size: var(--font-size-sm);
-            border-left: 3px solid var(--primary-color);
-        }
-
-        body.dark-theme .view-description {
-            background: var(--dark-background);
-            color: var(--dark-text-secondary);
-        }
-
-        .view-content-wrapper {
-            background: var(--background-color);
-            border-radius: var(--radius-md);
-            padding: var(--spacing-lg);
-            margin-bottom: var(--spacing-lg);
-            max-height: 400px;
-            overflow-y: auto;
-        }
-
-        body.dark-theme .view-content-wrapper {
-            background: var(--dark-background);
-        }
-
-        .view-content {
-            white-space: pre-wrap;
-            word-wrap: break-word;
-            font-family: 'Consolas', 'Monaco', monospace;
-            font-size: var(--font-size-sm);
-            line-height: 1.6;
-            margin: 0;
-            color: var(--text-primary);
-        }
-
-        body.dark-theme .view-content {
-            color: var(--dark-text-primary);
-        }
-
-        .view-meta {
-            display: flex;
-            flex-wrap: wrap;
-            gap: var(--spacing-md);
-            font-size: var(--font-size-xs);
-            color: var(--text-muted);
-        }
-
-        .view-meta-item {
-            display: flex;
-            align-items: center;
-            gap: var(--spacing-xs);
-        }
-
-        .view-tags {
-            display: flex;
-            flex-wrap: wrap;
-            gap: var(--spacing-xs);
-            margin-top: var(--spacing-sm);
-        }
-
-        .view-tag {
-            background: rgba(99, 102, 241, 0.1);
-            color: var(--primary-color);
-            padding: 2px 8px;
-            border-radius: var(--radius-sm);
-            font-size: var(--font-size-xs);
-        }
-
-        /* 表单行样式 */
-        .form-row {
-            display: flex;
-            gap: var(--spacing-md);
-        }
-
-        .form-row .form-group {
-            flex: 1;
-            margin-bottom: var(--spacing-lg);
-        }
-
-        /* 分类选择器样式 */
         .category-input-wrapper {
-            position: relative;
             display: flex;
-            gap: var(--spacing-sm);
+            gap: var(--space-sm);
         }
 
         .category-input-wrapper .form-control {
@@ -936,152 +941,571 @@
 
         .category-select {
             width: auto;
-            min-width: 120px;
+            min-width: 130px;
+        }
+
+        /* ===== Toast 通知 ===== */
+        .toast-container {
+            position: fixed;
+            top: var(--space-xl);
+            right: var(--space-xl);
+            z-index: 300;
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-sm);
+        }
+
+        @media (max-width: 480px) {
+            .toast-container {
+                left: var(--space-lg);
+                right: var(--space-lg);
+            }
+        }
+
+        .toast {
+            display: flex;
+            align-items: center;
+            gap: var(--space-md);
+            padding: var(--space-lg);
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-lg);
+            min-width: 280px;
+            animation: toastEnter 0.3s ease-out;
+        }
+
+        @keyframes toastEnter {
+            from {
+                opacity: 0;
+                transform: translateX(100%) scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0) scale(1);
+            }
+        }
+
+        .toast-icon {
+            width: 24px;
+            height: 24px;
+            flex-shrink: 0;
+        }
+
+        .toast-icon.success { color: var(--success); }
+        .toast-icon.error { color: var(--danger); }
+        .toast-icon.warning { color: var(--warning); }
+        .toast-icon.info { color: var(--info); }
+
+        .toast-content {
+            flex: 1;
+        }
+
+        .toast-title {
+            font-weight: 600;
+            font-size: var(--font-sm);
+            margin-bottom: 2px;
+        }
+
+        .toast-message {
+            font-size: var(--font-xs);
+            color: var(--text-secondary);
+        }
+
+        .toast-close {
+            width: 24px;
+            height: 24px;
+            border: none;
+            background: transparent;
+            color: var(--text-muted);
+            border-radius: var(--radius-sm);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+        }
+
+        .toast-close:hover {
+            background: var(--danger-light);
+            color: var(--danger);
+        }
+
+        /* ===== 详情模态框 ===== */
+        .view-description {
+            background: var(--bg-body);
+            padding: var(--space-md) var(--space-lg);
+            border-radius: var(--radius-md);
+            margin-bottom: var(--space-lg);
+            color: var(--text-secondary);
+            font-size: var(--font-sm);
+            border-left: 3px solid var(--primary);
+        }
+
+        .view-content-wrapper {
+            background: var(--bg-body);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            margin-bottom: var(--space-lg);
+            max-height: 360px;
+            overflow-y: auto;
+        }
+
+        .view-content {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            font-family: 'SF Mono', 'Fira Code', Consolas, monospace;
+            font-size: var(--font-sm);
+            line-height: 1.7;
+            margin: 0;
+            color: var(--text-primary);
+        }
+
+        .view-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: var(--space-md);
+            font-size: var(--font-xs);
+            color: var(--text-muted);
+        }
+
+        .view-meta-item {
+            display: flex;
+            align-items: center;
+            gap: var(--space-xs);
+        }
+
+        .view-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: var(--space-xs);
+            margin-top: var(--space-md);
+        }
+
+        .view-tag {
+            background: var(--primary-light);
+            color: var(--primary);
+            padding: 4px 10px;
+            border-radius: var(--radius-full);
+            font-size: var(--font-xs);
+            font-weight: 500;
+        }
+
+        /* ===== 加载动画 ===== */
+        .loading {
+            display: inline-block;
+            width: 18px;
+            height: 18px;
+            border: 2px solid var(--border-color);
+            border-radius: 50%;
+            border-top-color: var(--primary);
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* ===== 侧边栏遮罩 ===== */
+        .sidebar-backdrop {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.3);
+            z-index: 99;
+            opacity: 0;
+            visibility: hidden;
+            transition: all var(--transition-normal);
+        }
+
+        .sidebar-backdrop.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        @media (min-width: 1024px) {
+            .sidebar-backdrop {
+                display: none;
+            }
+        }
+
+        /* ===== 复制成功动画 ===== */
+        .copy-success {
+            animation: copyPulse 0.3s ease;
+        }
+
+        @keyframes copyPulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.2); color: var(--success); }
+            100% { transform: scale(1); }
+        }
+
+        /* ===== 骨架屏 ===== */
+        .skeleton {
+            background: linear-gradient(90deg, var(--bg-body) 25%, var(--bg-card) 50%, var(--bg-body) 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+            border-radius: var(--radius-md);
+        }
+
+        @keyframes shimmer {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+
+        /* ===== Backdrop-filter 降级 ===== */
+        @supports not (backdrop-filter: blur(1px)) {
+            .sidebar {
+                background: var(--bg-card);
+            }
+            .topbar {
+                background: var(--bg-card);
+            }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <!-- 头部 -->
-        <header class="header">
-            <div class="header-content">
-                <div class="header-left">
-                    <h1 class="header-title">📝 提示词管理工具</h1>
-                    <p class="header-subtitle">高效管理和组织你的AI提示词</p>
-                </div>
-                <div class="header-controls">
-                    <!-- 状态指示器 -->
-                    <div class="status-indicator" id="statusIndicator">
-                        <span class="status-dot"></span>
-                        <span id="statusText">未登录</span>
+    <!-- SVG 图标库 (Symbol System) -->
+    <svg style="display: none;">
+        <defs>
+            <!-- 搜索 -->
+            <symbol id="icon-search" viewBox="0 0 24 24">
+                <circle cx="11" cy="11" r="8"></circle>
+                <path d="m21 21-4.3-4.3"></path>
+            </symbol>
+            <!-- 加号 -->
+            <symbol id="icon-plus" viewBox="0 0 24 24">
+                <path d="M12 5v14M5 12h14"></path>
+            </symbol>
+            <!-- 编辑 -->
+            <symbol id="icon-edit" viewBox="0 0 24 24">
+                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+            </symbol>
+            <!-- 删除 -->
+            <symbol id="icon-trash" viewBox="0 0 24 24">
+                <polyline points="3 6 5 6 21 6"></polyline>
+                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+            </symbol>
+            <!-- 复制 -->
+            <symbol id="icon-copy" viewBox="0 0 24 24">
+                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+            </symbol>
+            <!-- 勾选 -->
+            <symbol id="icon-check" viewBox="0 0 24 24">
+                <polyline points="20 6 9 17 4 12"></polyline>
+            </symbol>
+            <!-- 关闭 -->
+            <symbol id="icon-x" viewBox="0 0 24 24">
+                <path d="M18 6 6 18M6 6l12 12"></path>
+            </symbol>
+            <!-- 网格 -->
+            <symbol id="icon-grid" viewBox="0 0 24 24">
+                <rect x="3" y="3" width="7" height="7"></rect>
+                <rect x="14" y="3" width="7" height="7"></rect>
+                <rect x="14" y="14" width="7" height="7"></rect>
+                <rect x="3" y="14" width="7" height="7"></rect>
+            </symbol>
+            <!-- 星星 -->
+            <symbol id="icon-star" viewBox="0 0 24 24">
+                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+            </symbol>
+            <!-- 标签 -->
+            <symbol id="icon-tag" viewBox="0 0 24 24">
+                <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path>
+                <line x1="7" y1="7" x2="7.01" y2="7"></line>
+            </symbol>
+            <!-- 文件夹 -->
+            <symbol id="icon-folder" viewBox="0 0 24 24">
+                <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+            </symbol>
+            <!-- 设置 -->
+            <symbol id="icon-settings" viewBox="0 0 24 24">
+                <circle cx="12" cy="12" r="3"></circle>
+                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+            </symbol>
+            <!-- 菜单 -->
+            <symbol id="icon-menu" viewBox="0 0 24 24">
+                <line x1="3" y1="12" x2="21" y2="12"></line>
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <line x1="3" y1="18" x2="21" y2="18"></line>
+            </symbol>
+            <!-- 太阳 -->
+            <symbol id="icon-sun" viewBox="0 0 24 24">
+                <circle cx="12" cy="12" r="5"></circle>
+                <line x1="12" y1="1" x2="12" y2="3"></line>
+                <line x1="12" y1="21" x2="12" y2="23"></line>
+                <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                <line x1="1" y1="12" x2="3" y2="12"></line>
+                <line x1="21" y1="12" x2="23" y2="12"></line>
+                <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+            </symbol>
+            <!-- 月亮 -->
+            <symbol id="icon-moon" viewBox="0 0 24 24">
+                <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+            </symbol>
+            <!-- 云 -->
+            <symbol id="icon-cloud" viewBox="0 0 24 24">
+                <path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"></path>
+            </symbol>
+            <!-- 登录 -->
+            <symbol id="icon-log-in" viewBox="0 0 24 24">
+                <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path>
+                <polyline points="10 17 15 12 10 7"></polyline>
+                <line x1="15" y1="12" x2="3" y2="12"></line>
+            </symbol>
+            <!-- 登出 -->
+            <symbol id="icon-log-out" viewBox="0 0 24 24">
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                <polyline points="16 17 21 12 16 7"></polyline>
+                <line x1="21" y1="12" x2="9" y2="12"></line>
+            </symbol>
+            <!-- 更多 -->
+            <symbol id="icon-more" viewBox="0 0 24 24">
+                <circle cx="12" cy="12" r="1"></circle>
+                <circle cx="12" cy="5" r="1"></circle>
+                <circle cx="12" cy="19" r="1"></circle>
+            </symbol>
+            <!-- 眼睛 -->
+            <symbol id="icon-eye" viewBox="0 0 24 24">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                <circle cx="12" cy="12" r="3"></circle>
+            </symbol>
+            <!-- 筛选 -->
+            <symbol id="icon-filter" viewBox="0 0 24 24">
+                <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
+            </symbol>
+            <!-- 上传 -->
+            <symbol id="icon-upload" viewBox="0 0 24 24">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="17 8 12 3 7 8"></polyline>
+                <line x1="12" y1="3" x2="12" y2="15"></line>
+            </symbol>
+            <!-- 下载 -->
+            <symbol id="icon-download" viewBox="0 0 24 24">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="7 10 12 15 17 10"></polyline>
+                <line x1="12" y1="15" x2="12" y2="3"></line>
+            </symbol>
+            <!-- 锁 -->
+            <symbol id="icon-lock" viewBox="0 0 24 24">
+                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+            </symbol>
+            <!-- 地球 -->
+            <symbol id="icon-globe" viewBox="0 0 24 24">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="2" y1="12" x2="22" y2="12"></line>
+                <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+            </symbol>
+            <!-- 图钉 -->
+            <symbol id="icon-pin" viewBox="0 0 24 24">
+                <path d="M12 17v5"></path>
+                <path d="M9 11V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v7"></path>
+                <path d="M17 11h-10l1 6h8l1-6z"></path>
+            </symbol>
+            <!-- 日历 -->
+            <symbol id="icon-calendar" viewBox="0 0 24 24">
+                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                <line x1="16" y1="2" x2="16" y2="6"></line>
+                <line x1="8" y1="2" x2="8" y2="6"></line>
+                <line x1="3" y1="10" x2="21" y2="10"></line>
+            </symbol>
+            <!-- 刷新 -->
+            <symbol id="icon-refresh" viewBox="0 0 24 24">
+                <polyline points="23 4 23 10 17 10"></polyline>
+                <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+            </symbol>
+        </defs>
+    </svg>
+
+    <div class="app-shell">
+        <!-- 侧边栏遮罩 -->
+        <div class="sidebar-backdrop" id="sidebarBackdrop" onclick="toggleSidebar()"></div>
+
+        <!-- 侧边栏 -->
+        <aside class="sidebar" id="sidebar" role="navigation" aria-label="侧边导航">
+            <header class="sidebar-header">
+                <div class="logo">
+                    <div class="logo-icon">
+                        <span class="icon"><svg><use href="#icon-grid"/></svg></span>
                     </div>
-                    <!-- 控制按钮组 -->
-                    <div class="btn-group">
-                        <button class="btn btn-secondary btn-sm" id="loginBtn" onclick="showLoginModal()">
-                            🔐 登录
+                    <span>提示词管理</span>
+                </div>
+            </header>
+
+            <nav class="sidebar-nav">
+                <div class="nav-section">
+                    <div class="nav-section-title">视图</div>
+                    <button class="nav-item active" onclick="setVisibilityFilter('all')" aria-current="page">
+                        <span class="icon"><svg><use href="#icon-grid"/></svg></span>
+                        <span>全部提示词</span>
+                        <span class="nav-item-count" id="countAll">0</span>
+                    </button>
+                    <button class="nav-item" onclick="setVisibilityFilter('public')">
+                        <span class="icon"><svg><use href="#icon-globe"/></svg></span>
+                        <span>公开</span>
+                        <span class="nav-item-count" id="countPublic">0</span>
+                    </button>
+                    <button class="nav-item" onclick="setVisibilityFilter('private')">
+                        <span class="icon"><svg><use href="#icon-lock"/></svg></span>
+                        <span>私密</span>
+                        <span class="nav-item-count" id="countPrivate">0</span>
+                    </button>
+                </div>
+
+                <div class="nav-section">
+                    <div class="nav-section-title">分类</div>
+                    <div id="categoryNav"></div>
+                </div>
+            </nav>
+
+            <footer class="sidebar-footer">
+                <div class="sync-status" id="statusIndicator">
+                    <span class="sync-dot" id="syncDot"></span>
+                    <span id="statusText">未登录</span>
+                </div>
+            </footer>
+        </aside>
+
+        <!-- 主内容区 -->
+        <main class="main-content">
+            <!-- 顶部栏 -->
+            <header class="topbar">
+                <button class="menu-toggle" onclick="toggleSidebar()">
+                    <span class="icon icon-lg"><svg><use href="#icon-menu"/></svg></span>
+                </button>
+
+                <div class="search-container">
+                    <label for="searchInput" class="sr-only">搜索提示词</label>
+                    <span class="search-icon icon" aria-hidden="true"><svg><use href="#icon-search"/></svg></span>
+                    <input type="text" class="search-input" placeholder="搜索提示词..." id="searchInput" oninput="filterPrompts()" aria-label="搜索提示词">
+                </div>
+
+                <div class="topbar-actions">
+                    <button class="btn btn-icon btn-ghost" onclick="toggleTheme()" title="切换主题" id="themeToggle">
+                        <span class="icon"><svg><use href="#icon-moon"/></svg></span>
+                    </button>
+                    <button class="btn btn-icon btn-ghost" id="loginBtn" onclick="showLoginModal()" title="登录">
+                        <span class="icon"><svg><use href="#icon-log-in"/></svg></span>
+                    </button>
+                    <button class="btn btn-icon btn-ghost" id="syncBtn" onclick="syncToCloud()" title="同步" style="display: none;">
+                        <span class="icon"><svg><use href="#icon-cloud"/></svg></span>
+                    </button>
+                    <button class="btn btn-primary desktop-only" onclick="showAddPromptModal()">
+                        <span class="icon"><svg><use href="#icon-plus"/></svg></span>
+                        <span>新建</span>
+                    </button>
+                </div>
+            </header>
+
+            <!-- 内容区域 -->
+            <div class="content-area">
+                <!-- 工具栏 -->
+                <div class="toolbar">
+                    <div class="filter-group">
+                        <select class="select-control" id="categoryFilter" onchange="filterPrompts()">
+                            <option value="all">全部分类</option>
+                        </select>
+                        <select class="select-control" id="sortBy" onchange="sortPrompts()">
+                            <option value="updated">最近更新</option>
+                            <option value="created">创建时间</option>
+                            <option value="name">名称排序</option>
+                            <option value="usage">使用次数</option>
+                        </select>
+                    </div>
+                    <div class="filter-group" style="margin-left: auto;">
+                        <button class="btn btn-secondary btn-sm" onclick="showImportModal()">
+                            <span class="icon icon-sm"><svg><use href="#icon-upload"/></svg></span>
+                            <span>导入</span>
                         </button>
-                        <button class="btn btn-secondary btn-sm" id="syncBtn" onclick="syncToCloud()" style="display: none;">
-                            ☁️ 同步
-                        </button>
-                        <button class="btn-icon" onclick="toggleTheme()" title="切换主题">
-                            🌙
+                        <button class="btn btn-secondary btn-sm" onclick="exportData()">
+                            <span class="icon icon-sm"><svg><use href="#icon-download"/></svg></span>
+                            <span>导出</span>
                         </button>
                     </div>
                 </div>
+
+                <!-- 提示词网格 -->
+                <div class="prompts-grid" id="promptsGrid"></div>
+
+                <!-- 空状态 -->
+                <div class="empty-state" id="emptyState" style="display: none;">
+                    <div class="empty-icon">
+                        <span class="icon icon-lg"><svg><use href="#icon-grid"/></svg></span>
+                    </div>
+                    <h3 class="empty-title">还没有提示词</h3>
+                    <p class="empty-text">点击「新建」按钮创建你的第一个提示词</p>
+                    <button class="btn btn-primary" onclick="showAddPromptModal()">
+                        <span class="icon"><svg><use href="#icon-plus"/></svg></span>
+                        <span>新建提示词</span>
+                    </button>
+                </div>
             </div>
-        </header>
+        </main>
 
-        <!-- 工具栏 -->
-        <div class="toolbar">
-            <!-- 搜索框 -->
-            <div class="search-box">
-                <span class="search-icon">🔍</span>
-                <input type="text" class="search-input" placeholder="搜索提示词..." id="searchInput" oninput="filterPrompts()">
-            </div>
-
-            <!-- 筛选组 -->
-            <div class="filter-group">
-                <select class="select-control" id="visibilityFilter" onchange="filterPrompts()">
-                    <option value="all">全部</option>
-                    <option value="public">公开</option>
-                    <option value="private">私密</option>
-                </select>
-
-                <select class="select-control" id="categoryFilter" onchange="filterPrompts()">
-                    <option value="all">全部分类</option>
-                </select>
-
-                <select class="select-control" id="sortBy" onchange="sortPrompts()">
-                    <option value="updated">最近更新</option>
-                    <option value="created">创建时间</option>
-                    <option value="name">名称</option>
-                    <option value="usage">使用次数</option>
-                </select>
-            </div>
-
-            <!-- 操作按钮 -->
-            <div class="btn-group">
-                <button class="btn btn-primary" onclick="showAddPromptModal()">
-                    ➕ 新建提示词
-                </button>
-                <button class="btn btn-secondary" onclick="showImportModal()">
-                    📥 导入
-                </button>
-                <button class="btn btn-secondary" onclick="exportData()">
-                    📤 导出
-                </button>
-            </div>
-        </div>
-
-        <!-- 提示词网格 -->
-        <div class="prompts-grid" id="promptsGrid">
-            <!-- 提示词卡片将通过JavaScript动态生成 -->
-        </div>
-
-        <!-- 空状态 -->
-        <div class="empty-state" id="emptyState" style="display: none;">
-            <div class="empty-icon">📝</div>
-            <h3 class="empty-title">还没有提示词</h3>
-            <p class="empty-text">点击"新建提示词"按钮创建你的第一个提示词</p>
-        </div>
+        <!-- 移动端 FAB -->
+        <button class="fab mobile-only" onclick="showAddPromptModal()">
+            <span class="icon icon-lg"><svg><use href="#icon-plus"/></svg></span>
+        </button>
     </div>
 
-    <!-- Toast通知容器 -->
+    <!-- Toast 容器 -->
     <div class="toast-container" id="toastContainer"></div>
 
-    <!-- 编辑/新建提示词模态框 -->
-    <div class="modal" id="promptModal">
+    <!-- 新建/编辑提示词模态框 -->
+    <div class="modal-overlay" id="promptModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
         <div class="modal-content">
             <div class="modal-header">
                 <h2 class="modal-title" id="modalTitle">新建提示词</h2>
-                <button class="modal-close" onclick="closeModal('promptModal')">✕</button>
+                <button class="modal-close" onclick="closeModal('promptModal')">
+                    <span class="icon"><svg><use href="#icon-x"/></svg></span>
+                </button>
             </div>
             <div class="modal-body">
                 <form id="promptForm" onsubmit="savePrompt(event)">
                     <div class="form-group">
                         <label class="form-label">标题 *</label>
-                        <input type="text" class="form-control" id="promptTitle" required>
+                        <input type="text" class="form-control" id="promptTitle" placeholder="给你的提示词起个名字" required>
                     </div>
-
                     <div class="form-group">
                         <label class="form-label">描述</label>
                         <input type="text" class="form-control" id="promptDescription" placeholder="简单介绍一下这个提示词的用途">
                         <span class="form-hint">可选，用于快速了解提示词用途</span>
                     </div>
-
                     <div class="form-group">
                         <label class="form-label">内容 *</label>
-                        <textarea class="form-control" id="promptContent" rows="8" required></textarea>
-                        <span class="form-hint">支持Markdown格式</span>
+                        <textarea class="form-control" id="promptContent" placeholder="在这里输入提示词内容..." rows="6" required></textarea>
+                        <span class="form-hint">支持 Markdown 格式</span>
                     </div>
-
                     <div class="form-row">
                         <div class="form-group">
                             <label class="form-label">分类</label>
                             <div class="category-input-wrapper">
-                                <input type="text" class="form-control" id="promptCategory" placeholder="输入或选择分类">
+                                <input type="text" class="form-control" id="promptCategory" placeholder="输入分类">
                                 <select class="form-control category-select" id="categorySelect" onchange="selectCategory()">
-                                    <option value="">选择已有分类</option>
+                                    <option value="">选择已有</option>
                                 </select>
                             </div>
                         </div>
                         <div class="form-group">
                             <label class="form-label">标签</label>
-                            <input type="text" class="form-control" id="promptTags" placeholder="多个标签用逗号、顿号或空格分隔">
+                            <input type="text" class="form-control" id="promptTags" placeholder="用逗号分隔">
                         </div>
                     </div>
-
                     <div class="form-row">
                         <div class="form-group">
                             <label class="checkbox-group">
                                 <input type="checkbox" class="checkbox" id="promptPrivate">
-                                <span class="form-label" style="margin: 0;">🔒 私密（仅登录后可见）</span>
+                                <span>私密（仅登录后可见）</span>
                             </label>
                         </div>
                         <div class="form-group">
                             <label class="checkbox-group">
                                 <input type="checkbox" class="checkbox" id="promptPinned">
-                                <span class="form-label" style="margin: 0;">📌 置顶</span>
+                                <span>置顶显示</span>
                             </label>
                         </div>
                     </div>
@@ -1089,61 +1513,76 @@
             </div>
             <div class="modal-footer">
                 <button class="btn btn-secondary" onclick="closeModal('promptModal')">取消</button>
-                <button class="btn btn-primary" onclick="document.getElementById('promptForm').requestSubmit()">保存</button>
+                <button class="btn btn-primary" onclick="document.getElementById('promptForm').requestSubmit()">
+                    <span class="icon icon-sm"><svg><use href="#icon-check"/></svg></span>
+                    <span>保存</span>
+                </button>
             </div>
         </div>
     </div>
 
     <!-- 登录模态框 -->
-    <div class="modal" id="loginModal">
+    <div class="modal-overlay" id="loginModal" role="dialog" aria-modal="true" aria-label="登录">
         <div class="modal-content" style="max-width: 400px;">
             <div class="modal-header">
                 <h2 class="modal-title">登录</h2>
-                <button class="modal-close" onclick="closeModal('loginModal')">✕</button>
+                <button class="modal-close" onclick="closeModal('loginModal')">
+                    <span class="icon"><svg><use href="#icon-x"/></svg></span>
+                </button>
             </div>
             <div class="modal-body">
                 <form id="loginForm" onsubmit="handleLogin(event)">
                     <div class="form-group">
                         <label class="form-label">密码</label>
-                        <input type="password" class="form-control" id="loginPassword" required>
-                        <span class="form-hint">输入云端同步密码</span>
+                        <input type="password" class="form-control" id="loginPassword" placeholder="输入云端同步密码" required>
+                        <span class="form-hint">输入密码后可同步数据到云端</span>
                     </div>
                 </form>
             </div>
             <div class="modal-footer">
                 <button class="btn btn-secondary" onclick="closeModal('loginModal')">取消</button>
-                <button class="btn btn-primary" onclick="document.getElementById('loginForm').requestSubmit()">登录</button>
+                <button class="btn btn-primary" onclick="document.getElementById('loginForm').requestSubmit()">
+                    <span class="icon icon-sm"><svg><use href="#icon-log-in"/></svg></span>
+                    <span>登录</span>
+                </button>
             </div>
         </div>
     </div>
 
     <!-- 导入模态框 -->
-    <div class="modal" id="importModal">
-        <div class="modal-content" style="max-width: 500px;">
+    <div class="modal-overlay" id="importModal" role="dialog" aria-modal="true" aria-label="导入数据">
+        <div class="modal-content" style="max-width: 440px;">
             <div class="modal-header">
                 <h2 class="modal-title">导入数据</h2>
-                <button class="modal-close" onclick="closeModal('importModal')">✕</button>
+                <button class="modal-close" onclick="closeModal('importModal')">
+                    <span class="icon"><svg><use href="#icon-x"/></svg></span>
+                </button>
             </div>
             <div class="modal-body">
                 <div class="form-group">
                     <label class="form-label">选择文件</label>
                     <input type="file" class="form-control" id="importFile" accept=".json">
-                    <span class="form-hint">支持JSON格式的数据文件</span>
+                    <span class="form-hint">支持 JSON 格式的数据文件</span>
                 </div>
             </div>
             <div class="modal-footer">
                 <button class="btn btn-secondary" onclick="closeModal('importModal')">取消</button>
-                <button class="btn btn-primary" onclick="handleImport()">导入</button>
+                <button class="btn btn-primary" onclick="handleImport()">
+                    <span class="icon icon-sm"><svg><use href="#icon-upload"/></svg></span>
+                    <span>导入</span>
+                </button>
             </div>
         </div>
     </div>
 
-    <!-- 提示词详情模态框 -->
-    <div class="modal" id="viewModal">
-        <div class="modal-content" style="max-width: 700px;">
+    <!-- 查看提示词详情模态框 -->
+    <div class="modal-overlay" id="viewModal" role="dialog" aria-modal="true" aria-labelledby="viewModalTitle">
+        <div class="modal-content" style="max-width: 640px;">
             <div class="modal-header">
                 <h2 class="modal-title" id="viewModalTitle">提示词详情</h2>
-                <button class="modal-close" onclick="closeModal('viewModal')">✕</button>
+                <button class="modal-close" onclick="closeModal('viewModal')">
+                    <span class="icon"><svg><use href="#icon-x"/></svg></span>
+                </button>
             </div>
             <div class="modal-body">
                 <div id="viewDescription" class="view-description" style="display: none;"></div>
@@ -1154,14 +1593,20 @@
             </div>
             <div class="modal-footer">
                 <button class="btn btn-secondary" onclick="closeModal('viewModal')">关闭</button>
-                <button class="btn btn-secondary" onclick="editPromptFromView()">✏️ 编辑</button>
-                <button class="btn btn-primary" onclick="copyFromView()">📋 复制内容</button>
+                <button class="btn btn-secondary" onclick="editPromptFromView()">
+                    <span class="icon icon-sm"><svg><use href="#icon-edit"/></svg></span>
+                    <span>编辑</span>
+                </button>
+                <button class="btn btn-primary" onclick="copyFromView()">
+                    <span class="icon icon-sm"><svg><use href="#icon-copy"/></svg></span>
+                    <span>复制内容</span>
+                </button>
             </div>
         </div>
     </div>
 
     <script>
-        // 全局变量
+        // ===== 全局变量 =====
         let appData = {
             prompts: [],
             settings: {
@@ -1176,47 +1621,59 @@
         };
 
         let editingPromptId = null;
+        let viewingPromptId = null;
+        let currentVisibilityFilter = 'all';
 
-        // 初始化
+        // ===== 初始化 =====
         document.addEventListener('DOMContentLoaded', function() {
             initTheme();
             loadData();
             renderPrompts();
             updateCategories();
+            updateCounts();
             checkAuth();
         });
 
-        // 主题切换
+        // ===== 主题切换 =====
         function initTheme() {
-            const savedTheme = localStorage.getItem('promptManagerTheme') || 'light';
-            if (savedTheme === 'dark') {
-                document.body.classList.add('dark-theme');
-                document.querySelector('.btn-icon').textContent = '☀️';
-            }
-            appData.settings.theme = savedTheme;
+            const savedTheme = localStorage.getItem('promptManagerTheme') ||
+                              (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+            applyTheme(savedTheme);
+        }
+
+        function applyTheme(theme) {
+            document.documentElement.setAttribute('data-theme', theme);
+            appData.settings.theme = theme;
+            updateThemeIcon();
         }
 
         function toggleTheme() {
-            const isDark = document.body.classList.contains('dark-theme');
-            if (isDark) {
-                document.body.classList.remove('dark-theme');
-                document.querySelector('.btn-icon').textContent = '🌙';
-                appData.settings.theme = 'light';
-            } else {
-                document.body.classList.add('dark-theme');
-                document.querySelector('.btn-icon').textContent = '☀️';
-                appData.settings.theme = 'dark';
-            }
-            localStorage.setItem('promptManagerTheme', appData.settings.theme);
+            const currentTheme = document.documentElement.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            applyTheme(newTheme);
+            localStorage.setItem('promptManagerTheme', newTheme);
             saveData();
         }
 
-        // 数据管理
+        function updateThemeIcon() {
+            const themeToggle = document.getElementById('themeToggle');
+            const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+            themeToggle.innerHTML = `<span class="icon"><svg><use href="#icon-${isDark ? 'sun' : 'moon'}"/></svg></span>`;
+        }
+
+        // ===== 侧边栏 =====
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const backdrop = document.getElementById('sidebarBackdrop');
+            sidebar.classList.toggle('open');
+            backdrop.classList.toggle('show');
+        }
+
+        // ===== 数据管理 =====
         function saveData() {
             try {
                 localStorage.setItem('promptManagerData', JSON.stringify(appData));
                 if (authState.isLoggedIn) {
-                    // 触发云端同步（延迟1秒）
                     clearTimeout(window.syncTimeout);
                     window.syncTimeout = setTimeout(() => syncToCloud(true), 1000);
                 }
@@ -1230,7 +1687,6 @@
                 const saved = localStorage.getItem('promptManagerData');
                 if (saved) {
                     appData = JSON.parse(saved);
-                    // 确保数据结构完整
                     if (!appData.prompts) appData.prompts = [];
                     if (!appData.settings) appData.settings = { theme: 'light' };
                 }
@@ -1240,24 +1696,15 @@
             }
         }
 
-        // 渲染提示词
+        // ===== 渲染提示词 =====
         function renderPrompts() {
             const grid = document.getElementById('promptsGrid');
             const emptyState = document.getElementById('emptyState');
 
-            console.log('=== DEBUG renderPrompts ===');
-            console.log('登录状态:', authState.isLoggedIn);
-
-            // 获取筛选后的提示词
             let prompts = getFilteredPrompts();
-
-            console.log('筛选后提示词数量:', prompts.length);
-
-            // 应用排序
             prompts = sortPromptsList(prompts);
 
             if (prompts.length === 0) {
-                console.log('没有提示词,显示空状态');
                 grid.innerHTML = '';
                 emptyState.style.display = 'block';
                 return;
@@ -1265,132 +1712,112 @@
 
             emptyState.style.display = 'none';
 
-            let renderedCount = 0;
             grid.innerHTML = prompts.map(prompt => {
-                const isPrivate = prompt.isPrivate === true; // 明确判断是否为私密
+                const isPrivate = prompt.isPrivate === true;
                 const isPinned = prompt.isPinned || false;
                 const category = prompt.category || '未分类';
-                const tags = prompt.tags || [];
                 const usage = prompt.usage || 0;
                 const updatedAt = prompt.updatedAt ? new Date(prompt.updatedAt).toLocaleDateString() : '';
 
-                // 未登录时隐藏私密提示词(只隐藏isPrivate=true的)
                 if (isPrivate && !authState.isLoggedIn) {
-                    console.log('隐藏私密提示词:', prompt.title);
                     return '';
                 }
 
-                renderedCount++;
-                if (renderedCount === 1) {
-                    console.log('渲染第一个提示词:', prompt.title, '| isPrivate:', isPrivate);
-                }
-
                 return `
-                    <div class="prompt-card ${isPrivate ? 'private' : 'public'}" onclick="viewPrompt('${prompt.id}')">
-                        <div class="prompt-header">
-                            <h3 class="prompt-title">${escapeHtml(prompt.title)}</h3>
-                            <div class="prompt-badges">
-                                ${isPinned ? '<span class="badge badge-pinned">📌</span>' : ''}
+                    <article class="prompt-card ${isPrivate ? 'private' : 'public'}" onclick="viewPrompt('${prompt.id}')">
+                        <div class="card-header">
+                            <h3 class="card-title">${escapeHtml(prompt.title)}</h3>
+                            <div class="card-badges">
+                                ${isPinned ? '<span class="badge badge-pinned"><span class="icon icon-sm"><svg><use href="#icon-pin"/></svg></span></span>' : ''}
                                 <span class="badge ${isPrivate ? 'badge-private' : 'badge-public'}">
-                                    ${isPrivate ? '🔒 私密' : '🌐 公开'}
+                                    <span class="icon icon-sm"><svg><use href="#icon-${isPrivate ? 'lock' : 'globe'}"/></svg></span>
+                                    ${isPrivate ? '私密' : '公开'}
                                 </span>
                             </div>
                         </div>
-                        <div class="prompt-content">${escapeHtml(prompt.content)}</div>
-                        <div class="prompt-footer">
-                            <div class="prompt-meta">
-                                <span>📁 ${escapeHtml(category)}</span>
-                                <span>👁️ ${usage}</span>
-                                ${updatedAt ? `<span>📅 ${updatedAt}</span>` : ''}
+                        <div class="card-content">${escapeHtml(prompt.content)}</div>
+                        <div class="card-footer">
+                            <div class="card-meta">
+                                <span class="card-meta-item">
+                                    <span class="icon icon-sm"><svg><use href="#icon-folder"/></svg></span>
+                                    ${escapeHtml(category)}
+                                </span>
+                                <span class="card-meta-item">
+                                    <span class="icon icon-sm"><svg><use href="#icon-eye"/></svg></span>
+                                    ${usage}
+                                </span>
                             </div>
-                            <div class="prompt-actions" onclick="event.stopPropagation()">
-                                <button class="btn btn-secondary btn-sm" onclick="copyPromptContent('${prompt.id}')" title="复制">
-                                    📋
+                            <div class="card-actions" onclick="event.stopPropagation()">
+                                <button class="btn btn-ghost btn-sm btn-icon" onclick="copyPromptContent('${prompt.id}')" title="复制">
+                                    <span class="icon icon-sm"><svg><use href="#icon-copy"/></svg></span>
                                 </button>
-                                <button class="btn btn-secondary btn-sm" onclick="editPrompt('${prompt.id}')" title="编辑">
-                                    ✏️
+                                <button class="btn btn-ghost btn-sm btn-icon" onclick="editPrompt('${prompt.id}')" title="编辑">
+                                    <span class="icon icon-sm"><svg><use href="#icon-edit"/></svg></span>
                                 </button>
-                                <button class="btn btn-secondary btn-sm" onclick="deletePrompt('${prompt.id}')" title="删除">
-                                    🗑️
+                                <button class="btn btn-ghost btn-sm btn-icon" onclick="deletePrompt('${prompt.id}')" title="删除">
+                                    <span class="icon icon-sm"><svg><use href="#icon-trash"/></svg></span>
                                 </button>
                             </div>
                         </div>
-                    </div>
+                    </article>
                 `;
             }).join('');
-
-            console.log('实际渲染的提示词数量:', renderedCount);
-            console.log('=== renderPrompts END ===');
         }
 
-        // 筛选提示词
+        // ===== 筛选提示词 =====
         function getFilteredPrompts() {
             const searchTerm = document.getElementById('searchInput').value.toLowerCase();
-            const visibilityFilter = document.getElementById('visibilityFilter').value;
             const categoryFilter = document.getElementById('categoryFilter').value;
 
-            console.log('=== DEBUG getFilteredPrompts ===');
-            console.log('总提示词数量:', appData.prompts.length);
-            console.log('可见性筛选器:', visibilityFilter);
-            console.log('登录状态:', authState.isLoggedIn);
-
-            const filtered = appData.prompts.filter(prompt => {
-                // 搜索过滤
+            return appData.prompts.filter(prompt => {
                 const matchesSearch = !searchTerm ||
                     prompt.title.toLowerCase().includes(searchTerm) ||
                     prompt.content.toLowerCase().includes(searchTerm) ||
                     (prompt.category && prompt.category.toLowerCase().includes(searchTerm));
 
-                // 可见性过滤 - 明确判断,未设置isPrivate的视为公开
                 const isPrivate = prompt.isPrivate === true;
-
-                // 如果用户选择了筛选条件,则应用筛选
-                // 如果是"全部",则不过滤(后续在renderPrompts中根据登录状态决定是否显示)
                 let matchesVisibility = true;
-                if (visibilityFilter === 'public') {
+                if (currentVisibilityFilter === 'public') {
                     matchesVisibility = !isPrivate;
-                } else if (visibilityFilter === 'private') {
+                } else if (currentVisibilityFilter === 'private') {
                     matchesVisibility = isPrivate;
                 }
-                // visibilityFilter === 'all' 时,matchesVisibility 保持为 true
 
-                // 分类过滤
                 const matchesCategory = categoryFilter === 'all' ||
                     prompt.category === categoryFilter;
 
-                const result = matchesSearch && matchesVisibility && matchesCategory;
-
-                // 调试第一个提示词
-                if (prompt === appData.prompts[0]) {
-                    console.log('第一个提示词调试:');
-                    console.log('  标题:', prompt.title);
-                    console.log('  isPrivate字段值:', prompt.isPrivate);
-                    console.log('  isPrivate === true:', isPrivate);
-                    console.log('  matchesSearch:', matchesSearch);
-                    console.log('  matchesVisibility:', matchesVisibility);
-                    console.log('  matchesCategory:', matchesCategory);
-                    console.log('  最终结果:', result);
-                }
-
-                return result;
+                return matchesSearch && matchesVisibility && matchesCategory;
             });
-
-            console.log('筛选后数量:', filtered.length);
-            console.log('=== DEBUG END ===');
-
-            return filtered;
         }
 
-        // 排序提示词
+        function setVisibilityFilter(filter) {
+            currentVisibilityFilter = filter;
+
+            // 更新侧边栏激活状态和 ARIA
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+                item.removeAttribute('aria-current');
+            });
+            const activeItem = event.target.closest('.nav-item');
+            activeItem.classList.add('active');
+            activeItem.setAttribute('aria-current', 'page');
+
+            renderPrompts();
+
+            // 移动端关闭侧边栏
+            if (window.innerWidth < 1024) {
+                toggleSidebar();
+            }
+        }
+
+        // ===== 排序提示词 =====
         function sortPromptsList(prompts) {
             const sortBy = document.getElementById('sortBy').value;
 
-            const sorted = [...prompts].sort((a, b) => {
-                // 置顶的总是在前面
+            return [...prompts].sort((a, b) => {
                 if (a.isPinned && !b.isPinned) return -1;
                 if (!a.isPinned && b.isPinned) return 1;
 
-                // 按选择的排序方式排序
                 switch (sortBy) {
                     case 'updated':
                         return new Date(b.updatedAt || 0) - new Date(a.updatedAt || 0);
@@ -1404,11 +1831,8 @@
                         return 0;
                 }
             });
-
-            return sorted;
         }
 
-        // 筛选和排序
         function filterPrompts() {
             renderPrompts();
         }
@@ -1417,40 +1841,80 @@
             renderPrompts();
         }
 
-        // 更新分类下拉列表
+        // ===== 更新分类和计数 =====
         function updateCategories() {
             const categories = [...new Set(appData.prompts.map(p => p.category).filter(Boolean))];
             const categoryFilter = document.getElementById('categoryFilter');
             const categorySelect = document.getElementById('categorySelect');
+            const categoryNav = document.getElementById('categoryNav');
 
-            // 更新筛选下拉
             const currentValue = categoryFilter.value;
             categoryFilter.innerHTML = '<option value="all">全部分类</option>' +
                 categories.map(cat => `<option value="${escapeHtml(cat)}">${escapeHtml(cat)}</option>`).join('');
             categoryFilter.value = currentValue;
 
-            // 更新编辑表单的分类选择器
-            categorySelect.innerHTML = '<option value="">选择已有分类</option>' +
+            categorySelect.innerHTML = '<option value="">选择已有</option>' +
                 categories.map(cat => `<option value="${escapeHtml(cat)}">${escapeHtml(cat)}</option>`).join('');
+
+            // 更新侧边栏分类导航
+            categoryNav.innerHTML = categories.map(cat => {
+                const count = appData.prompts.filter(p => p.category === cat).length;
+                return `
+                    <button class="nav-item" onclick="setCategoryFilter('${escapeHtml(cat)}')">
+                        <span class="icon"><svg><use href="#icon-folder"/></svg></span>
+                        <span>${escapeHtml(cat)}</span>
+                        <span class="nav-item-count">${count}</span>
+                    </button>
+                `;
+            }).join('');
         }
 
-        // 选择已有分类
+        function updateCounts() {
+            const all = appData.prompts.length;
+            const publicCount = appData.prompts.filter(p => p.isPrivate !== true).length;
+            const privateCount = appData.prompts.filter(p => p.isPrivate === true).length;
+
+            document.getElementById('countAll').textContent = all;
+            document.getElementById('countPublic').textContent = publicCount;
+            document.getElementById('countPrivate').textContent = privateCount;
+        }
+
+        function setCategoryFilter(category) {
+            document.getElementById('categoryFilter').value = category;
+            currentVisibilityFilter = 'all';
+            renderPrompts();
+
+            if (window.innerWidth < 1024) {
+                toggleSidebar();
+            }
+        }
+
         function selectCategory() {
             const categorySelect = document.getElementById('categorySelect');
             const categoryInput = document.getElementById('promptCategory');
             if (categorySelect.value) {
                 categoryInput.value = categorySelect.value;
-                categorySelect.value = ''; // 重置选择器
+                categorySelect.value = '';
             }
         }
 
-        // 模态框操作
+        // ===== 模态框操作 =====
+        function showModal(modalId) {
+            document.getElementById(modalId).classList.add('show');
+            document.body.classList.add('modal-open');
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('show');
+            document.body.classList.remove('modal-open');
+        }
+
         function showAddPromptModal() {
             editingPromptId = null;
             document.getElementById('modalTitle').textContent = '新建提示词';
             document.getElementById('promptForm').reset();
             document.getElementById('categorySelect').value = '';
-            updateCategories(); // 确保分类选择器是最新的
+            updateCategories();
             showModal('promptModal');
         }
 
@@ -1469,28 +1933,21 @@
             document.getElementById('promptPinned').checked = prompt.isPinned || false;
             document.getElementById('categorySelect').value = '';
 
-            updateCategories(); // 确保分类选择器是最新的
+            updateCategories();
             showModal('promptModal');
         }
-
-        // 当前查看的提示词ID
-        let viewingPromptId = null;
 
         function viewPrompt(id) {
             const prompt = appData.prompts.find(p => p.id === id);
             if (!prompt) return;
 
             viewingPromptId = id;
-
-            // 增加使用次数
             prompt.usage = (prompt.usage || 0) + 1;
             saveData();
 
-            // 显示详情模态框
             document.getElementById('viewModalTitle').textContent = prompt.title;
             document.getElementById('viewContent').textContent = prompt.content;
 
-            // 显示描述（如果有）
             const descriptionEl = document.getElementById('viewDescription');
             if (prompt.description) {
                 descriptionEl.textContent = prompt.description;
@@ -1499,20 +1956,19 @@
                 descriptionEl.style.display = 'none';
             }
 
-            // 构建元信息
             const category = prompt.category || '未分类';
             const usage = prompt.usage || 0;
             const createdAt = prompt.createdAt ? new Date(prompt.createdAt).toLocaleDateString() : '';
             const updatedAt = prompt.updatedAt ? new Date(prompt.updatedAt).toLocaleDateString() : '';
             const tags = prompt.tags || [];
-            const isPrivate = prompt.isPrivate === true; // 明确判断
+            const isPrivate = prompt.isPrivate === true;
 
             let metaHtml = `
-                <span class="view-meta-item">📁 ${escapeHtml(category)}</span>
-                <span class="view-meta-item">👁️ 使用 ${usage} 次</span>
-                ${createdAt ? `<span class="view-meta-item">📅 创建于 ${createdAt}</span>` : ''}
-                ${updatedAt ? `<span class="view-meta-item">🔄 更新于 ${updatedAt}</span>` : ''}
-                <span class="view-meta-item">${isPrivate ? '🔒 私密' : '🌐 公开'}</span>
+                <span class="view-meta-item"><span class="icon icon-sm"><svg><use href="#icon-folder"/></svg></span> ${escapeHtml(category)}</span>
+                <span class="view-meta-item"><span class="icon icon-sm"><svg><use href="#icon-eye"/></svg></span> 使用 ${usage} 次</span>
+                ${createdAt ? `<span class="view-meta-item"><span class="icon icon-sm"><svg><use href="#icon-calendar"/></svg></span> 创建于 ${createdAt}</span>` : ''}
+                ${updatedAt ? `<span class="view-meta-item"><span class="icon icon-sm"><svg><use href="#icon-refresh"/></svg></span> 更新于 ${updatedAt}</span>` : ''}
+                <span class="view-meta-item"><span class="icon icon-sm"><svg><use href="#icon-${isPrivate ? 'lock' : 'globe'}"/></svg></span> ${isPrivate ? '私密' : '公开'}</span>
             `;
 
             if (tags.length > 0) {
@@ -1522,7 +1978,7 @@
             document.getElementById('viewMeta').innerHTML = metaHtml;
 
             showModal('viewModal');
-            renderPrompts(); // 更新使用次数显示
+            renderPrompts();
         }
 
         function editPromptFromView() {
@@ -1549,7 +2005,6 @@
 
             navigator.clipboard.writeText(prompt.content).then(() => {
                 showToast('复制成功', '提示词内容已复制到剪贴板', 'success');
-                // 增加使用次数
                 prompt.usage = (prompt.usage || 0) + 1;
                 saveData();
                 renderPrompts();
@@ -1565,6 +2020,7 @@
             saveData();
             renderPrompts();
             updateCategories();
+            updateCounts();
             showToast('删除成功', '提示词已删除', 'success');
         }
 
@@ -1576,7 +2032,6 @@
             const content = document.getElementById('promptContent').value.trim();
             const category = document.getElementById('promptCategory').value.trim();
             const tagsStr = document.getElementById('promptTags').value.trim();
-            // 支持多种分隔符：逗号、顿号、分号、空格
             const tags = tagsStr ? tagsStr.split(/[,，、;；\s]+/).map(t => t.trim()).filter(Boolean) : [];
             const isPrivate = document.getElementById('promptPrivate').checked;
             const isPinned = document.getElementById('promptPinned').checked;
@@ -1587,7 +2042,6 @@
             }
 
             if (editingPromptId) {
-                // 编辑现有提示词
                 const prompt = appData.prompts.find(p => p.id === editingPromptId);
                 if (prompt) {
                     prompt.title = title;
@@ -1600,7 +2054,6 @@
                     prompt.updatedAt = new Date().toISOString();
                 }
             } else {
-                // 新建提示词
                 const newPrompt = {
                     id: generateId(),
                     title,
@@ -1620,14 +2073,14 @@
             saveData();
             renderPrompts();
             updateCategories();
+            updateCounts();
             closeModal('promptModal');
             showToast('保存成功', editingPromptId ? '提示词已更新' : '提示词已创建', 'success');
         }
 
-        // 登录认证
+        // ===== 登录认证 =====
         function checkAuth() {
             if (authState.token) {
-                // 验证token
                 verifyToken();
             }
         }
@@ -1645,12 +2098,10 @@
                     updateAuthUI();
                     await loadFromCloud(true);
                 } else {
-                    // Token 无效，清除
                     logout();
                 }
             } catch (error) {
                 console.error('验证失败:', error);
-                // 网络错误时保持登录状态，使用本地缓存
                 authState.isLoggedIn = true;
                 updateAuthUI();
             }
@@ -1683,7 +2134,6 @@
                     closeModal('loginModal');
                     showToast('登录成功', '已连接到云端', 'success');
 
-                    // 加载云端数据
                     await loadFromCloud();
                 } else {
                     showToast('登录失败', result.error || '密码错误', 'error');
@@ -1698,22 +2148,22 @@
             authState.token = null;
             localStorage.removeItem('authToken');
             updateAuthUI();
-            renderPrompts(); // 重新渲染以隐藏私密提示词
+            renderPrompts();
             showToast('已退出', '已退出登录', 'info');
         }
 
         function updateAuthUI() {
             const loginBtn = document.getElementById('loginBtn');
             const syncBtn = document.getElementById('syncBtn');
-            const statusIndicator = document.getElementById('statusIndicator');
+            const syncDot = document.getElementById('syncDot');
             const statusText = document.getElementById('statusText');
-            const statusDot = statusIndicator.querySelector('.status-dot');
 
             if (authState.isLoggedIn) {
-                loginBtn.textContent = '🚪 退出';
+                loginBtn.innerHTML = '<span class="icon"><svg><use href="#icon-log-out"/></svg></span>';
                 loginBtn.onclick = logout;
+                loginBtn.title = '退出登录';
                 syncBtn.style.display = 'inline-flex';
-                statusDot.classList.add('online');
+                syncDot.classList.add('online');
                 statusText.textContent = '已登录';
 
                 if (authState.lastSync) {
@@ -1721,15 +2171,16 @@
                     statusText.textContent = `已同步 ${syncTime}`;
                 }
             } else {
-                loginBtn.textContent = '🔐 登录';
+                loginBtn.innerHTML = '<span class="icon"><svg><use href="#icon-log-in"/></svg></span>';
                 loginBtn.onclick = showLoginModal;
+                loginBtn.title = '登录';
                 syncBtn.style.display = 'none';
-                statusDot.classList.remove('online');
+                syncDot.classList.remove('online');
                 statusText.textContent = '未登录';
             }
         }
 
-        // 云端同步
+        // ===== 云端同步 =====
         async function syncToCloud(silent = false) {
             if (!authState.isLoggedIn) {
                 if (!silent) showToast('同步失败', '请先登录', 'error');
@@ -1737,10 +2188,8 @@
             }
 
             try {
-                // 显示同步中状态
                 const syncBtn = document.getElementById('syncBtn');
-                const originalText = syncBtn.innerHTML;
-                syncBtn.innerHTML = '<span class="loading"></span> 同步中';
+                syncBtn.innerHTML = '<span class="loading"></span>';
                 syncBtn.disabled = true;
 
                 const response = await fetch('/api/data/sync', {
@@ -1752,7 +2201,7 @@
                     body: JSON.stringify(appData)
                 });
 
-                syncBtn.innerHTML = originalText;
+                syncBtn.innerHTML = '<span class="icon"><svg><use href="#icon-cloud"/></svg></span>';
                 syncBtn.disabled = false;
 
                 if (response.ok) {
@@ -1774,7 +2223,7 @@
                 }
             } catch (error) {
                 const syncBtn = document.getElementById('syncBtn');
-                syncBtn.innerHTML = '☁️ 同步';
+                syncBtn.innerHTML = '<span class="icon"><svg><use href="#icon-cloud"/></svg></span>';
                 syncBtn.disabled = false;
                 if (!silent) showToast('同步失败', '无法连接到服务器', 'error');
             }
@@ -1799,14 +2248,10 @@
                     if (result.data) {
                         const cloudData = result.data;
 
-                        // 合并数据：云端数据优先，但保留本地独有的数据
                         if (cloudData.prompts && Array.isArray(cloudData.prompts)) {
-                            // 创建云端提示词的 ID 集合
                             const cloudIds = new Set(cloudData.prompts.map(p => p.id));
-                            // 保留本地独有的提示词
                             const localOnlyPrompts = appData.prompts.filter(p => !cloudIds.has(p.id));
 
-                            // 合并：云端数据 + 本地独有数据
                             appData.prompts = [...cloudData.prompts, ...localOnlyPrompts];
 
                             if (cloudData.settings) {
@@ -1816,13 +2261,13 @@
                             saveData();
                             renderPrompts();
                             updateCategories();
+                            updateCounts();
                         }
 
                         authState.lastSync = result.lastSync ? new Date(result.lastSync).toISOString() : new Date().toISOString();
                         updateAuthUI();
                         if (!silent) showToast('加载成功', '已从云端加载数据', 'success');
                     } else {
-                        // 云端没有数据，上传本地数据
                         if (!silent) showToast('提示', '云端暂无数据，将上传本地数据', 'info');
                         await syncToCloud(silent);
                     }
@@ -1839,7 +2284,7 @@
             }
         }
 
-        // 导入导出
+        // ===== 导入导出 =====
         function showImportModal() {
             showModal('importModal');
         }
@@ -1859,9 +2304,7 @@
                     const imported = JSON.parse(e.target.result);
 
                     if (imported.prompts && Array.isArray(imported.prompts)) {
-                        // 合并数据
                         imported.prompts.forEach(prompt => {
-                            // 检查是否已存在
                             const exists = appData.prompts.find(p => p.id === prompt.id);
                             if (!exists) {
                                 appData.prompts.push(prompt);
@@ -1871,6 +2314,7 @@
                         saveData();
                         renderPrompts();
                         updateCategories();
+                        updateCounts();
                         closeModal('importModal');
                         showToast('导入成功', `已导入 ${imported.prompts.length} 个提示词`, 'success');
                     } else {
@@ -1897,15 +2341,7 @@
             showToast('导出成功', '数据已导出', 'success');
         }
 
-        // 工具函数
-        function showModal(modalId) {
-            document.getElementById(modalId).classList.add('show');
-        }
-
-        function closeModal(modalId) {
-            document.getElementById(modalId).classList.remove('show');
-        }
-
+        // ===== 工具函数 =====
         function generateId() {
             return Date.now().toString(36) + Math.random().toString(36).substr(2);
         }
@@ -1919,41 +2355,43 @@
         function showToast(title, message, type = 'info') {
             const container = document.getElementById('toastContainer');
 
-            const icons = {
-                success: '✅',
-                error: '❌',
-                warning: '⚠️',
-                info: 'ℹ️'
+            const iconMap = {
+                success: 'check',
+                error: 'x',
+                warning: 'x',
+                info: 'eye'
             };
 
             const toast = document.createElement('div');
             toast.className = 'toast';
             toast.innerHTML = `
-                <span class="toast-icon">${icons[type] || icons.info}</span>
+                <span class="toast-icon ${type}">
+                    <svg><use href="#icon-${iconMap[type] || 'eye'}"/></svg>
+                </span>
                 <div class="toast-content">
                     <div class="toast-title">${escapeHtml(title)}</div>
                     <div class="toast-message">${escapeHtml(message)}</div>
                 </div>
-                <button class="toast-close" onclick="this.parentElement.remove()">✕</button>
+                <button class="toast-close" onclick="this.parentElement.remove()">
+                    <svg><use href="#icon-x"/></svg>
+                </button>
             `;
 
             container.appendChild(toast);
 
-            // 3秒后自动移除
             setTimeout(() => {
-                toast.style.animation = 'toastSlideIn 0.3s ease-out reverse';
+                toast.style.animation = 'toastEnter 0.3s ease-out reverse';
                 setTimeout(() => toast.remove(), 300);
             }, 3000);
         }
 
-        // 页面退出前同步
+        // ===== 生命周期 =====
         window.addEventListener('beforeunload', function() {
             if (authState.isLoggedIn) {
                 syncToCloud(true);
             }
         });
 
-        // 定期自动同步（每5分钟）
         setInterval(() => {
             if (authState.isLoggedIn) {
                 syncToCloud(true);
